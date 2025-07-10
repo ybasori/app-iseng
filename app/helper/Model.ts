@@ -151,7 +151,6 @@ class Model {
    */
   sortQuery(pagination?: IPagination): string {
     if (!!pagination && !!pagination.sort) {
-        console.log(pagination.sort)
       const queries = pagination.sort
         .filter((item) => {
           if (!!item.by && !!item.order) {
@@ -406,7 +405,8 @@ class Model {
           " AND "
         )} ${sortQuery} ${paginationQuery}`;
 
-        console.log(query)
+       const timestamp = new Date().toISOString();
+        console.log(`[${timestamp}]\x1b[38;2;255;165;0m[SQL]\x1b[0m ${query}`)
 
         const [mainResult] = await db.query(query);
 
