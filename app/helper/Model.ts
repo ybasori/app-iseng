@@ -151,6 +151,7 @@ class Model {
    */
   sortQuery(pagination?: IPagination): string {
     if (!!pagination && !!pagination.sort) {
+        console.log(pagination.sort)
       const queries = pagination.sort
         .filter((item) => {
           if (!!item.by && !!item.order) {
@@ -443,7 +444,9 @@ class Model {
                         .filter(
                           (a) => !!a[relations[joinName].relatedTo.localKey]
                         )
-                        .map((a) => a[relations[joinName].relatedTo.localKey]),
+                        .filter((a, i, s)=> s.findIndex((z)=>a===z)===i)
+                        .map((a) => a[relations[joinName].relatedTo.localKey])
+                        .filter((a, i, s)=> s.findIndex((z)=>a===z)===i),
                     },
                   },
                   join: joinJoin,
@@ -465,7 +468,8 @@ class Model {
                         )
                         .map(
                           (a) => a[relations[joinName].relatedTo.foreignKey]
-                        ),
+                        )
+                        .filter((a, i, s)=> s.findIndex((z)=>a===z)===i),
                     },
                   },
                   join: joinJoin,

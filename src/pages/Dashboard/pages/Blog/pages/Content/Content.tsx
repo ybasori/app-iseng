@@ -15,6 +15,7 @@ const Content = () => {
       size: 10,
     },
   });
+  const [sort, setSort] = useState<{by:string; order:"asc"|"desc"}[]>([]);
 
   useEffect(() => {
     if (oneTime) {
@@ -28,9 +29,9 @@ const Content = () => {
   useEffect(() => {
     if (loadContent) {
       setLoadContent(false);
-      dispatch(fetchBlogContent(pagination));
+      dispatch(fetchBlogContent(pagination, sort));
     }
-  }, [dispatch, loadContent, pagination]);
+  }, [dispatch, loadContent, pagination, sort]);
 
   return (
     <>
@@ -52,6 +53,11 @@ const Content = () => {
       </div>
 
       <Table
+        sort={sort}
+        onSort={(s)=>{
+          setSort([...s]);
+          setLoadContent(true);
+        }}
         page={pagination.page}
         totalPage={Math.ceil(blogContent.response?.result.total/pagination.page.size) ?? 1}
         onPage={(page)=>{
@@ -63,9 +69,10 @@ const Content = () => {
         }}
         data={!!blogContent.response ? blogContent.response.result.data : []}
         columns={[
-          { name: "Title", field: "title" },
-          { name: "Created At", field: "created_at" },
-          { name: "Updated At", field: "updated_at" },
+          { name: "Title", field: "title", sortable:true },
+          { name: "Author", field: "created_by.name", sortable:true },
+          { name: "Created At", field: "created_at", sortable:true },
+          { name: "Updated At", field: "updated_at", sortable:true },
           {
             name: "Action",
             render: () => {

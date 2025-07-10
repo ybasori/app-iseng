@@ -23,7 +23,8 @@ export default tseslint.config([
       "no-extra-boolean-cast":"off",
       "no-constant-condition":"off",
       "@typescript-eslint/no-explicit-any":"off",
-      "no-async-promise-executor":"off"
+      "no-async-promise-executor":"off",
+      "no-useless-escape":"off"
     }
   },
 ])

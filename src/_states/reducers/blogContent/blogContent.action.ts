@@ -3,10 +3,10 @@ import { expandJSON } from "@src/helper/helper";
 
 const name = "blogContent";
 
-export const fetchBlogContent = (pagination:{page:{of:number;size:number}}): Thunk => {
+export const fetchBlogContent = (pagination:{page:{of:number;size:number}}, sort:{by:string; order: "asc"|"desc"}[]): Thunk => {
   return async (dispatch) => {
 
-    const query = expandJSON(pagination).map((item)=>`${item.label}=${item.value}`).join("&")
+    const query = expandJSON({...pagination, sort}).map((item)=>`${item.label}=${item.value}`).join("&")
     dispatch({
       type: `${name}/LOADING`,
     });

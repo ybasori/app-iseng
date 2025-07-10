@@ -8,6 +8,8 @@ const Table: React.FC<ITable> = ({
   totalPage,
   page,
   onPage,
+  sort = [],
+  onSort,
 }) => {
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
@@ -79,9 +81,41 @@ const Table: React.FC<ITable> = ({
                   />
                 </label>
               </th>
-              {columns.map((item, key) => (
-                <th key={key}>{item.name}</th>
-              ))}
+              {columns.map((item, key) => {
+                const sortItem = sort.find((s) => s.by === item.field);
+                return (
+                  <th key={key}>
+                    {item.name}{" "}
+                    {item.sortable ? (
+                      <a onClick={(e) => {e.preventDefault();
+                        if(!!item.field){
+                            let newData:{by:string; order:"asc"|"desc"}|null = null;
+                            if(!!!sortItem){
+                                    newData = {
+                                    by: item.field,
+                                    order: "asc"
+                                }
+                            }
+                            if(!!sortItem && sortItem.order==="asc"){
+                                newData = {
+                                    by: item.field,
+                                    order: "desc"
+                                }
+                            }
+                            if(!!newData){
+                                onSort?.([...sort.filter((sitem)=>sitem.by!==item.field), newData])
+                            }
+                            else{
+                                onSort?.([...sort.filter((sitem)=>sitem.by!==item.field)])
+                            }
+                        }
+                      }}>
+                        {!!sortItem?sortItem.order==="desc"?<i className="fa-solid fa-sort-up"></i>:<i className="fa-solid fa-sort-down"></i>:<i className="fa-solid fa-sort"></i>}
+                      </a>
+                    ) : null}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
@@ -128,51 +162,60 @@ const Table: React.FC<ITable> = ({
         </table>
       </div>
 
-      
-        <div className="select is-small">
-          <select 
-            value={page.size}
-            onChange={(e) => onPage({...page, size: Number(e.currentTarget.value)})}>
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="30">30</option>
-            <option value="50">50</option>
-          </select>
+      <div className="columns">
+        <div className="column">
+          <div className="select is-small">
+            <select
+              value={page.size}
+              onChange={(e) =>
+                onPage({ ...page, size: Number(e.currentTarget.value) })
+              }
+            >
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="30">30</option>
+              <option value="50">50</option>
+            </select>
+          </div>
         </div>
+        <div className="column is-three-fifths">
+          <nav
+            className="pagination is-small"
+            role="navigation"
+            aria-label="pagination"
+          >
+            <a
+              className={`pagination-previous ${
+                page.of === 1 ? `is-disabled` : ``
+              }`}
+              onClick={(e) => {
+                e.preventDefault();
 
-      <nav
-        className="pagination is-centered is-small"
-        role="navigation"
-        aria-label="pagination"
-      >
-        <a
-          className={`pagination-previous ${page.of===1?`is-disabled`:``}`}
-          onClick={(e) => {
-            e.preventDefault();
+                if (page.of > 1) {
+                  onPage({ ...page, of: page.of - 1 });
+                  handleHeaderCheckboxChange(false);
+                }
+              }}
+            >
+              Previous
+            </a>
+            <a
+              className={`pagination-next ${
+                page.of === totalPage ? `is-disabled` : ``
+              }`}
+              onClick={(e) => {
+                e.preventDefault();
 
-            if(page.of>1){
-            onPage({...page, of:page.of - 1});
-            handleHeaderCheckboxChange(false)
-            }
-          }}
-        >
-          Previous
-        </a>
-        <a
-          className={`pagination-next ${page.of===totalPage?`is-disabled`:``}`}
-          onClick={(e) => {
-            e.preventDefault();
-
-            if(page.of<totalPage){
-            onPage({...page, of:page.of + 1});
-            handleHeaderCheckboxChange(false)
-            }
-          }}
-        >
-          Next page
-        </a>
-        <ul className="pagination-list">
-          {/* <li>
+                if (page.of < totalPage) {
+                  onPage({ ...page, of: page.of + 1 });
+                  handleHeaderCheckboxChange(false);
+                }
+              }}
+            >
+              Next page
+            </a>
+            <ul className="pagination-list m-0">
+              {/* <li>
             <a href="#" className="pagination-link" aria-label="Goto page 1">
               1
             </a>
@@ -181,33 +224,34 @@ const Table: React.FC<ITable> = ({
             <span className="pagination-ellipsis">&hellip;</span>
           </li> */}
 
-          {listPage(totalPage)
-            .filter(
-              (item) =>
-                page.of -
-                  (totalPage - page.of <= 2
-                    ? 5 - (totalPage - page.of)
-                    : 3) <
-                  item &&
-                item <= page.of + (page.of <= 2 ? 5 - page.of : 2)
-            )
-            .map((item, key) => (
-              <li key={key}>
-                <a
-                  className={`pagination-link  ${item===page.of?`is-current`:``}`}
-                  aria-label={`Goto page ${item}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleHeaderCheckboxChange(false)
-                    return onPage({...page, of: item});
-                  }}
-                >
-                  {item}
-                </a>
-              </li>
-            ))}
-          
-          {/* <li>
+              {listPage(totalPage)
+                .filter(
+                  (item) =>
+                    page.of -
+                      (totalPage - page.of <= 2
+                        ? 5 - (totalPage - page.of)
+                        : 3) <
+                      item && item <= page.of + (page.of <= 2 ? 5 - page.of : 2)
+                )
+                .map((item, key) => (
+                  <li key={key}>
+                    <a
+                      className={`pagination-link  ${
+                        item === page.of ? `is-current` : ``
+                      }`}
+                      aria-label={`Goto page ${item}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleHeaderCheckboxChange(false);
+                        return onPage({ ...page, of: item });
+                      }}
+                    >
+                      {item}
+                    </a>
+                  </li>
+                ))}
+
+              {/* <li>
             <span className="pagination-ellipsis">&hellip;</span>
           </li>
           <li>
@@ -215,8 +259,10 @@ const Table: React.FC<ITable> = ({
               86
             </a>
           </li> */}
-        </ul>
-      </nav>
+            </ul>
+          </nav>
+        </div>
+      </div>
     </>
   );
 };

@@ -1,22 +1,11 @@
-import { promisify } from "@app/helper";
+import { convertToObj, promisify } from "@app/helper";
 import Validator from "@app/helper/Validator";
 import BlogContent from "@app/models/BlogContent";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
-const convertToObj = (input:any) => Object.entries(input).reduce((acc, [key, value]) => {
-  const match = key.match(/^(\w+)\[(\w+)\]$/);
-  if (match) {
-    const [, outerKey, innerKey] = match;
-    acc[outerKey] = acc[outerKey] || {};
-    
-    // If value looks like a number (e.g., '1' or '3.5'), convert it; otherwise, keep as string
-    const maybeNumber = Number(value);
-    acc[outerKey][innerKey] = !isNaN(maybeNumber) && (value as any).trim() !== '' ? maybeNumber : value;
-  }
-  return acc;
-}, {} as Record<string, any>);
+
 
 const blogController = {
   listContent: async (req: Request, res: Response) => {
@@ -36,11 +25,11 @@ const blogController = {
         pagination = { ...pagination, page: query.page };
       }
 
-      if (!!req.query.sort) {
-        pagination = { ...pagination, sort: req.query.sort };
+      if (!!query.sort) {
+        pagination = { ...pagination, sort: query.sort };
       }
-      if (!!req.query.filter) {
-        filter = {...filter, ...(req.query.filter as any)};
+      if (!!query.filter) {
+        filter = {...filter, ...(query.filter as any)};
       }
 
       const blogContentModel = new BlogContent();
