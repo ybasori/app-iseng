@@ -5,6 +5,13 @@ const initialState: IBlogContentState = {
   loading: false,
   response: null,
   error: null,
+  page: {
+    of: 1,
+    size: 10,
+  },
+  sort: [
+    {by:"created_at", order: "desc"}
+  ]
 };
 const blogContent = (state = initialState, action?: IAction) => {
   const name = "blogContent";
@@ -34,6 +41,10 @@ const blogContent = (state = initialState, action?: IAction) => {
             : {}),
         },
       };
+    case `${name}/SET_PAGE`:
+      return { ...state, page: action.payload };
+    case `${name}/SET_SORT`:
+      return { ...state, sort: action.payload };
     default:
       return state;
   }

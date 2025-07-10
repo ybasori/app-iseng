@@ -15,4 +15,6 @@ export interface IBlogContentState {
     };
   } | null;
   error: any;
+  page:{of:number;size:number};
+  sort:{by:string;order:"asc"|"desc"}[];
 }

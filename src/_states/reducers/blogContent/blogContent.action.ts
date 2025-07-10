@@ -3,10 +3,10 @@ import { expandJSON } from "@src/helper/helper";
 
 const name = "blogContent";
 
-export const fetchBlogContent = (pagination:{page:{of:number;size:number}}, sort:{by:string; order: "asc"|"desc"}[]): Thunk => {
+export const fetchBlogContent = (page:{of:number;size:number}, sort:{by:string; order: "asc"|"desc"}[]): Thunk => {
   return async (dispatch) => {
 
-    const query = expandJSON({...pagination, sort}).map((item)=>`${item.label}=${item.value}`).join("&")
+    const query = expandJSON({page, sort}).map((item)=>`${item.label}=${item.value}`).join("&")
     dispatch({
       type: `${name}/LOADING`,
     });
@@ -41,4 +41,18 @@ export const addBlogContent = (data:{title:string;content:string}):Thunk=>{
           payload: data
         })
     }
+}
+
+export const setPage = (page:{of:number;size:number}):Thunk => (dispatch)=> {
+        dispatch({
+          type: `${name}/SET_PAGE`,
+          payload: page
+        })
+}
+
+export const setSort = (sort:{by:string;order:"asc"|"desc"}[]):Thunk => (dispatch)=> {
+        dispatch({
+          type: `${name}/SET_SORT`,
+          payload: sort
+        })
 }

@@ -1,4 +1,4 @@
-import { fetchBlogContent } from "@src/_states/reducers/blogContent/blogContent.action";
+import { fetchBlogContent, setPage, setSort } from "@src/_states/reducers/blogContent/blogContent.action";
 import { useDispatch, useSelector } from "@src/components/atoms/GlobalState";
 import Link from "@src/components/atoms/Link/Link";
 import Table from "@src/components/atoms/Table/Table";
@@ -9,13 +9,6 @@ const Content = () => {
   const [loadContent, setLoadContent] = useState(false);
   const { blogContent } = useSelector();
   const dispatch = useDispatch();
-  const [pagination, setPagination] = useState({
-    page: {
-      of: 1,
-      size: 10,
-    },
-  });
-  const [sort, setSort] = useState<{by:string; order:"asc"|"desc"}[]>([]);
 
   useEffect(() => {
     if (oneTime) {
@@ -29,9 +22,9 @@ const Content = () => {
   useEffect(() => {
     if (loadContent) {
       setLoadContent(false);
-      dispatch(fetchBlogContent(pagination, sort));
+      dispatch(fetchBlogContent(blogContent.page, blogContent.sort));
     }
-  }, [dispatch, loadContent, pagination, sort]);
+  }, [blogContent.page, blogContent.sort, dispatch, loadContent]);
 
   return (
     <>
@@ -53,18 +46,15 @@ const Content = () => {
       </div>
 
       <Table
-        sort={sort}
+        sort={blogContent.sort}
         onSort={(s)=>{
-          setSort([...s]);
+          dispatch(setSort([...s]));
           setLoadContent(true);
         }}
-        page={pagination.page}
-        totalPage={Math.ceil(blogContent.response?.result.total/pagination.page.size) ?? 1}
+        page={blogContent.page}
+        totalPage={Math.ceil(blogContent.response?.result.total/blogContent.page.size) ?? 1}
         onPage={(page)=>{
-            setPagination({
-              ...pagination,
-              page
-            });
+          dispatch(setPage(page));
             setLoadContent(true);
         }}
         data={!!blogContent.response ? blogContent.response.result.data : []}
