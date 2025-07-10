@@ -1,138 +1,119 @@
+import { fetchBlogContent } from "@src/_states/reducers/blogContent/blogContent.action";
+import { useDispatch, useSelector } from "@src/components/atoms/GlobalState";
 import Link from "@src/components/atoms/Link/Link";
+import Table from "@src/components/atoms/Table/Table";
+import { useEffect, useState } from "react";
 
 const Content = () => {
-    return <><div className="buttons">
-        <label className="checkbox">
-          <input type="checkbox" />
-        </label>
-        <button className="button is-info is-small">Reload</button>
-        <Link className="button is-success is-small" to="/dashboard/blog/content/create">Add</Link>
+  const [oneTime, setOneTime] = useState(true);
+  const [loadContent, setLoadContent] = useState(false);
+  const { blogContent } = useSelector();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (oneTime) {
+      setOneTime(false);
+      if(!!!blogContent.response){
+      setLoadContent(true);
+      }
+    }
+  }, [blogContent.response, oneTime]);
+
+  useEffect(() => {
+    if (loadContent) {
+      setLoadContent(false);
+        dispatch(fetchBlogContent());
+    }
+  }, [dispatch, loadContent]);
+
+  return (
+    <>
+      <div className="buttons">
+        <button className="button is-info is-small" type={"button"} onClick={()=>setLoadContent(true)}>Reload</button>
+        <Link
+          className="button is-success is-small"
+          to="/dashboard/blog/content/create"
+        >
+          Add
+        </Link>
         <button className="button is-danger is-small">Delete</button>
-          <div className="select is-small">
-            <select>
-              <option>With options</option>
-              <option>Select dropdown</option>
-            </select>
-          </div>
+        <div className="select is-small">
+          <select>
+            <option>With options</option>
+            <option>Select dropdown</option>
+          </select>
+        </div>
       </div>
-      
-      <div className="table-container">
-        <table className="table is-bordered is-fullwidth">
-          <tbody>
 
-            <tr>
-              <th className="is-link">Link th cell</th>
-              <td>Two</td>
-              <td className="is-link">Link td cell</td>
-              <td>Four</td>
-              <td>Five</td>
-            </tr>
-            <tr className="is-link">
-              <th>Link row</th>
-              <td>Two</td>
-              <td>Three</td>
-              <td>Four</td>
-              <td>Five</td>
-            </tr>
+      <Table
+        data={!!blogContent.response ? blogContent.response.result.data : []}
+        columns={[
+          { name: "Title", field: "title" },
+          {
+            name: "Action",
+            render: () => {
+              return (
+                <>
+                  <button className="button is-info is-small" type="button">Edit</button>
+                </>
+              );
+            },
+          },
+        ]}
+        loading={blogContent.loading}
+      />
 
-            <tr>
-              <th className="is-primary">Primary th cell</th>
-              <td>Two</td>
-              <td className="is-primary">Primary td cell</td>
-              <td>Four</td>
-              <td>Five</td>
-            </tr>
-            <tr className="is-primary">
-              <th>Primary row</th>
-              <td>Two</td>
-              <td>Three</td>
-              <td>Four</td>
-              <td>Five</td>
-            </tr>
-
-            <tr>
-              <th className="is-info">Info th cell</th>
-              <td>Two</td>
-              <td className="is-info">Info td cell</td>
-              <td>Four</td>
-              <td>Five</td>
-            </tr>
-            <tr className="is-info">
-              <th>Info row</th>
-              <td>Two</td>
-              <td>Three</td>
-              <td>Four</td>
-              <td>Five</td>
-            </tr>
-
-            <tr>
-              <th className="is-success">Success th cell</th>
-              <td>Two</td>
-              <td className="is-success">Success td cell</td>
-              <td>Four</td>
-              <td>Five</td>
-            </tr>
-            <tr className="is-success">
-              <th>Success row</th>
-              <td>Two</td>
-              <td>Three</td>
-              <td>Four</td>
-              <td>Five</td>
-            </tr>
-
-            <tr>
-              <th className="is-warning">Warning th cell</th>
-              <td>Two</td>
-              <td className="is-warning">Warning td cell</td>
-              <td>Four</td>
-              <td>Five</td>
-            </tr>
-            <tr className="is-warning">
-              <th>Warning row</th>
-              <td>Two</td>
-              <td>Three</td>
-              <td>Four</td>
-              <td>Five</td>
-            </tr>
-
-            <tr>
-              <th className="is-danger">Danger th cell</th>
-              <td>Two</td>
-              <td className="is-danger">Danger td cell</td>
-              <td>Four</td>
-              <td>Five</td>
-            </tr>
-            <tr className="is-danger">
-              <th>Danger row</th>
-              <td>Two</td>
-              <td>Three</td>
-              <td>Four</td>
-              <td>Five</td>
-            </tr>
-
-          </tbody>
-        </table>
-      </div>
-      
-      <nav className="pagination is-centered is-small" role="navigation" aria-label="pagination">
-        <a href="#" className="pagination-previous">Previous</a>
-        <a href="#" className="pagination-next">Next page</a>
+      <nav
+        className="pagination is-centered is-small"
+        role="navigation"
+        aria-label="pagination"
+      >
+        <a href="#" className="pagination-previous">
+          Previous
+        </a>
+        <a href="#" className="pagination-next">
+          Next page
+        </a>
         <ul className="pagination-list">
-          <li><a href="#" className="pagination-link" aria-label="Goto page 1">1</a></li>
-          <li><span className="pagination-ellipsis">&hellip;</span></li>
-          <li><a href="#" className="pagination-link" aria-label="Goto page 45">45</a></li>
+          <li>
+            <a href="#" className="pagination-link" aria-label="Goto page 1">
+              1
+            </a>
+          </li>
+          <li>
+            <span className="pagination-ellipsis">&hellip;</span>
+          </li>
+          <li>
+            <a href="#" className="pagination-link" aria-label="Goto page 45">
+              45
+            </a>
+          </li>
           <li>
             <a
               className="pagination-link is-current"
               aria-label="Page 46"
               aria-current="page"
-            >46</a>
+            >
+              46
+            </a>
           </li>
-          <li><a href="#" className="pagination-link" aria-label="Goto page 47">47</a></li>
-          <li><span className="pagination-ellipsis">&hellip;</span></li>
-          <li><a href="#" className="pagination-link" aria-label="Goto page 86">86</a></li>
+          <li>
+            <a href="#" className="pagination-link" aria-label="Goto page 47">
+              47
+            </a>
+          </li>
+          <li>
+            <span className="pagination-ellipsis">&hellip;</span>
+          </li>
+          <li>
+            <a href="#" className="pagination-link" aria-label="Goto page 86">
+              86
+            </a>
+          </li>
         </ul>
-      </nav></>
-}
+      </nav>
+    </>
+  );
+};
 
 export default Content;

@@ -1,10 +1,10 @@
-import { useDispatch, useSelector } from "@src/components/atoms/GlobalState";
+import { useDispatch } from "@src/components/atoms/GlobalState";
 import { navigate } from "@src/_states/reducers/route/route.action";
 import { useState } from "react";
 import { notify } from "@src/_states/reducers/notif/notif.action";
 
 const Login = () => {
-    const {auth} = useSelector();
+    // const {auth} = useSelector();
     const dispatch = useDispatch();
     const [form, setForm] = useState({
         username:"",

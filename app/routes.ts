@@ -4,10 +4,6 @@ import homeController from "./controllers/homeController";
 import { IRoute } from "./helper";
 
 const routes: IRoute[] = [{
-    path: "/",
-    method: "get",
-    controller: homeController.index,
-}, {
     path: "/api",
     children: [{
         path: "/login",
@@ -22,6 +18,10 @@ const routes: IRoute[] = [{
         children: [{
             path: "/content",
             children: [{
+                path: "/",
+                method: "get",
+                controller: blogController.listContent
+            },{
                 path: "/create",
                 method: "post",
                 controller: blogController.createContent

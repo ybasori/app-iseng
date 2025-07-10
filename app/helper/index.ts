@@ -1,17 +1,16 @@
-
 export interface IRoute {
-    path: string;
-    method?: "get" | "post" | "put" | "patch" | "delete";
-    middleware?: any[];
-    controller?: any; 
-    children?: IRoute[]
+  path: string;
+  method?: "get" | "post" | "put" | "patch" | "delete";
+  middleware?: any[];
+  controller?: any;
+  children?: IRoute[];
 }
 
 const onArrayForm = (
-    name: string,
-    data: IRoute[],
-    obj: IRoute[],
-    middlewares: any[]
+  name: string,
+  data: IRoute[],
+  obj: IRoute[],
+  middlewares: any[]
 ) => {
   let newObj = [...obj];
   data.forEach((item) => {
@@ -44,7 +43,7 @@ const onArrayForm = (
 
 /**
  * @typedef {{
- * path: string, 
+ * path: string,
  * method:"post",
  * middleware: any[],
  * controller: any,
@@ -53,14 +52,13 @@ const onArrayForm = (
  */
 
 /**
- * 
- * @param {IRoute[]} data 
- * @returns 
+ *
+ * @param {IRoute[]} data
+ * @returns
  */
 
-
 export const expandRouter = (data: IRoute[]) => {
-  let obj:IRoute[]= [];
+  let obj: IRoute[] = [];
   data.forEach((item) => {
     if (item.controller) {
       obj = [
@@ -85,11 +83,11 @@ export const expandRouter = (data: IRoute[]) => {
   return obj;
 };
 
-export const renderHtml = (payload?:{title?:string, reducer?: any}) => {
-    const title = payload?.title ?? "Document";
-    const reducer = payload?.reducer ?? "{}";
+export const renderHtml = (payload?: { title?: string; reducer?: any }) => {
+  const title = payload?.title ?? "Document";
+  const reducer = payload?.reducer ?? "{}";
 
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
     <html lang="en">
       <head>
         <meta charset="UTF-8" />
@@ -106,5 +104,17 @@ export const renderHtml = (payload?:{title?:string, reducer?: any}) => {
         <script src="/assets/js/app.bundle.js"></script>
         <script src="/assets/js/runtime.bundle.js"></script>
       </body>
-    </html>`
-}
+    </html>`;
+};
+
+export const promisify =
+  (callbackFunc:any) =>
+  (...args:any) =>
+    new Promise((resolve, reject) => {
+      callbackFunc(...args, (error:any, result:any) => {
+        if (error) {
+          return reject(error);
+        }
+        resolve(result);
+      });
+    });

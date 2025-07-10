@@ -51,7 +51,7 @@ const authController ={
         const [user] = users
 
         const comparePassword = await bcrypt.compare(req.body.password, user.password);
-            console.log("======", comparePassword)
+            // console.log("======", comparePassword)
 
         if(!!!comparePassword){
             return res.status(400).json({

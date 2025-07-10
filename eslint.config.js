@@ -19,5 +19,11 @@ export default tseslint.config([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules:{
+      "no-extra-boolean-cast":"off",
+      "no-constant-condition":"off",
+      "@typescript-eslint/no-explicit-any":"off",
+      "no-async-promise-executor":"off"
+    }
   },
 ])

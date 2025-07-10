@@ -9,6 +9,8 @@ import Blog from '../pages/Dashboard/pages/Blog/Blog';
 import Content from '../pages/Dashboard/pages/Blog/pages/Content/Content';
 import Create from '@src/pages/Dashboard/pages/Blog/pages/Content/pages/Create/Create';
 
+export interface IRoute{name: string; Template?: any; component: React.ReactNode; isProtected?:boolean}
+
 export const router:{[path:string]:{name: string; Template?: any; component: React.ReactNode; isProtected?:boolean}} = {
   "/dashboard/blog/content/create": {
     name: "Create Content",

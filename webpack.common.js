@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-/* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
 // const HtmlWebpackPlugin = require("html-webpack-plugin");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
@@ -23,7 +21,7 @@ module.exports = {
     rules: [
       {
         test: /\.(ts|tsx)$/,
-        exclude: [path.resolve("node_modules")],
+        exclude: [path.resolve("node_modules"), path.resolve("app")],
         use: ["ts-loader"],
       },
       {

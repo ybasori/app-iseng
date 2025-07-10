@@ -14,7 +14,7 @@ export const navigate = (
       
       
           let matchPath= "/404";
-          let matchRoute= null;
+          // let matchRoute:any= null;
       
           for(let i=0; i<Object.keys(router).length; i++){
             const matcher = match(Object.keys(router)[i]);
@@ -23,7 +23,7 @@ export const navigate = (
             if (!!result) {
               matchPath = Object.keys(router)[i];
               i = Object.keys(router).length;
-              matchRoute = {...result};
+              // matchRoute = {...result};
             }
           }
       
