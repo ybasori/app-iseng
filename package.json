@@ -1,0 +1,63 @@
+{
+  "name": "app-iseng",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev:server": "npx nodemon",
+    "dev:client": "npx webpack serve --config webpack.dev.js",
+    "build": "npx webpack --config webpack.prod.js",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "node_modules"
+    ],
+    "watch": [
+      "app"
+    ],
+    "exec": "node -r tsconfig-paths/register -r ts-node/register -r ./app/index.ts",
+    "ext": "ts, js"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.7.2",
+    "bcrypt": "^6.0.0",
+    "bulma": "^1.0.4",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.0.1",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.14.1",
+    "path-to-regexp": "^8.2.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.29.0",
+    "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.9",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "css-loader": "^7.1.2",
+    "eslint": "^9.29.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.2.0",
+    "nodemon": "^3.1.10",
+    "sass": "^1.89.2",
+    "sass-loader": "^16.0.5",
+    "style-loader": "^4.0.0",
+    "ts-loader": "^9.5.2",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "tsconfig-paths-webpack-plugin": "^4.2.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.34.1",
+    "webpack": "^5.99.9",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^4.15.2",
+    "webpack-merge": "^6.0.1"
+  }
+}
