@@ -405,6 +405,8 @@ class Model {
           " AND "
         )} ${sortQuery} ${paginationQuery}`;
 
+        console.log(query)
+
         const [mainResult] = await db.query(query);
 
         let joinedResult = [...(mainResult as unknown[] as any[])];
@@ -528,7 +530,6 @@ class Model {
         let jr = [...joinedResult];
 
         const removeUnshowed = (data: any, joinShow:string[], joinRowStr:string[], subjoin:(string | IJoin)[]) => {
-            console.log(data, joinShow, joinRowStr, subjoin)
             
             Object.keys(data).forEach((key) => {
                     if (

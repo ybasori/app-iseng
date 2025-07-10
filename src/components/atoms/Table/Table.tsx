@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { ITable } from "./Table.type";
 
-const Table: React.FC<ITable> = ({ columns, data, loading }) => {
+const Table: React.FC<ITable> = ({
+  columns,
+  data,
+  loading,
+  totalPage,
+  page,
+  onPage,
+}) => {
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
   const isAllSelected =
@@ -45,6 +52,14 @@ const Table: React.FC<ITable> = ({ columns, data, loading }) => {
     } else {
       return row[field];
     }
+  };
+
+  const listPage = (total: number) => {
+    let list: number[] = [];
+    for (let i = 1; i <= total; i++) {
+      list = [...list, i];
+    }
+    return list;
   };
 
   return (
@@ -112,6 +127,96 @@ const Table: React.FC<ITable> = ({ columns, data, loading }) => {
           </tbody>
         </table>
       </div>
+
+      
+        <div className="select is-small">
+          <select 
+            value={page.size}
+            onChange={(e) => onPage({...page, size: Number(e.currentTarget.value)})}>
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="30">30</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+
+      <nav
+        className="pagination is-centered is-small"
+        role="navigation"
+        aria-label="pagination"
+      >
+        <a
+          className={`pagination-previous ${page.of===1?`is-disabled`:``}`}
+          onClick={(e) => {
+            e.preventDefault();
+
+            if(page.of>1){
+            onPage({...page, of:page.of - 1});
+            handleHeaderCheckboxChange(false)
+            }
+          }}
+        >
+          Previous
+        </a>
+        <a
+          className={`pagination-next ${page.of===totalPage?`is-disabled`:``}`}
+          onClick={(e) => {
+            e.preventDefault();
+
+            if(page.of<totalPage){
+            onPage({...page, of:page.of + 1});
+            handleHeaderCheckboxChange(false)
+            }
+          }}
+        >
+          Next page
+        </a>
+        <ul className="pagination-list">
+          {/* <li>
+            <a href="#" className="pagination-link" aria-label="Goto page 1">
+              1
+            </a>
+          </li>
+          <li>
+            <span className="pagination-ellipsis">&hellip;</span>
+          </li> */}
+
+          {listPage(totalPage)
+            .filter(
+              (item) =>
+                page.of -
+                  (totalPage - page.of <= 2
+                    ? 5 - (totalPage - page.of)
+                    : 3) <
+                  item &&
+                item <= page.of + (page.of <= 2 ? 5 - page.of : 2)
+            )
+            .map((item, key) => (
+              <li key={key}>
+                <a
+                  className={`pagination-link  ${item===page.of?`is-current`:``}`}
+                  aria-label={`Goto page ${item}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleHeaderCheckboxChange(false)
+                    return onPage({...page, of: item});
+                  }}
+                >
+                  {item}
+                </a>
+              </li>
+            ))}
+          
+          {/* <li>
+            <span className="pagination-ellipsis">&hellip;</span>
+          </li>
+          <li>
+            <a href="#" className="pagination-link" aria-label="Goto page 86">
+              86
+            </a>
+          </li> */}
+        </ul>
+      </nav>
     </>
   );
 };

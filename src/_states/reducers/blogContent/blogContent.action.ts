@@ -1,13 +1,16 @@
 import { Thunk } from "@src/_states/types";
+import { expandJSON } from "@src/helper/helper";
 
 const name = "blogContent";
 
-export const fetchBlogContent = (): Thunk => {
+export const fetchBlogContent = (pagination:{page:{of:number;size:number}}): Thunk => {
   return async (dispatch) => {
+
+    const query = expandJSON(pagination).map((item)=>`${item.label}=${item.value}`).join("&")
     dispatch({
       type: `${name}/LOADING`,
     });
-    fetch("/api/blog/content", {
+    fetch(`/api/blog/content?${query}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

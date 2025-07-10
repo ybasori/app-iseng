@@ -5,6 +5,19 @@ import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
+const convertToObj = (input:any) => Object.entries(input).reduce((acc, [key, value]) => {
+  const match = key.match(/^(\w+)\[(\w+)\]$/);
+  if (match) {
+    const [, outerKey, innerKey] = match;
+    acc[outerKey] = acc[outerKey] || {};
+    
+    // If value looks like a number (e.g., '1' or '3.5'), convert it; otherwise, keep as string
+    const maybeNumber = Number(value);
+    acc[outerKey][innerKey] = !isNaN(maybeNumber) && (value as any).trim() !== '' ? maybeNumber : value;
+  }
+  return acc;
+}, {} as Record<string, any>);
+
 const blogController = {
   listContent: async (req: Request, res: Response) => {
     try {
@@ -17,9 +30,10 @@ const blogController = {
 
       let filter = {};
       let pagination = {};
+      const query = convertToObj(req.query);
 
-      if (!!req.query.page) {
-        pagination = { ...pagination, page: req.query.page };
+      if (!!query.page) {
+        pagination = { ...pagination, page: query.page };
       }
 
       if (!!req.query.sort) {
@@ -36,7 +50,7 @@ const blogController = {
         join: [{name:"created_by", show: ["name"]}],
         show: ["uid", "title", "created_at", "updated_at"]
       });
-      const [blogContentTotal] = await blogContentModel.countByFilter({
+      const [[blogContentTotal]] = await blogContentModel.countByFilter({
         created_by_user_id: decoded.id,
       });
       return res.status(200).json({
