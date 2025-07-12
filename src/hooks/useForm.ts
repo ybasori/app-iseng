@@ -12,6 +12,7 @@ export type ICallbackSubmit = (values:any, config:{setSubmitting:(bool:boolean)=
 const useForm = ({ initialValues, validation = null }:IProps) => {
   // const [form, dispatch] = useReducer(reducer, initialValues);
   const [form, setForm] = useState(initialValues);
+  const [defaultForm, setDefaultForm] = useState(initialValues);
 
   const [isFormTouched, setIsFormTouched] = useState<string[]>([]);
   // const [isSubmitTouched, setIsSubmitTouched] = useState(false);
@@ -98,7 +99,13 @@ const useForm = ({ initialValues, validation = null }:IProps) => {
   };
 
   const handleReset = () => {
-    setForm(initialValues);
+    setForm({...defaultForm});
+  };
+
+  
+  const handleDefault = (value:any) => {
+    setForm(value);
+    setDefaultForm(value);
   };
 
 
@@ -115,6 +122,7 @@ const useForm = ({ initialValues, validation = null }:IProps) => {
     isSubmitting,
     isValid,
     handleChange,
+    setDefaultForm: handleDefault,
   } as const;
 };
 

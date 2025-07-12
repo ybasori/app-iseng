@@ -1,6 +1,6 @@
 export interface IRoute {
   path: string;
-  method?: "get" | "post" | "put" | "patch" | "delete";
+  method?: "get" | "post" | "put" | "patch" | "delete" | "all";
   middleware?: any[];
   controller?: any;
   children?: IRoute[];

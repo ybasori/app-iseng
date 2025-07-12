@@ -4,13 +4,17 @@ import {
   setSort,
 } from "@src/_states/reducers/blogContent/blogContent.action";
 import { notify } from "@src/_states/reducers/notif/notif.action";
-import { navigate } from "@src/_states/reducers/route/route.action";
 import { useDispatch, useSelector } from "@src/components/atoms/GlobalState";
 import useForm, { ICallbackSubmit } from "@src/hooks/useForm";
 import * as yup from "yup";
+import { ICreateEdit } from "./CreateEdit.type";
+import { useCallback, useEffect, useState } from "react";
+import { navigate } from "@src/helper/helper";
 
-const Create = () => {
-  const { blogContent } = useSelector();
+const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
+  const [oneTime, setOneTime] = useState(true);
+  const [categories, setCategories] = useState<any[]>([]);
+  const { blogContent, route } = useSelector();
   const dispatch = useDispatch();
 
   const validation = () => {
@@ -28,6 +32,7 @@ const Create = () => {
     isSubmitting,
     isValid,
     handleChange,
+    setDefaultForm,
   } = useForm({
     initialValues: {
       title: "",
@@ -36,14 +41,59 @@ const Create = () => {
     validation: validation(),
   });
 
-  const onSubmit: ICallbackSubmit = (values, { setSubmitting }) => {
-    fetch("/api/blog/content/create", {
-      method: "POST",
+  const onGetCategory = useCallback(() => {
+    fetch(`/api/blog/category?show[]=uid&show[]=name`, {
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(values),
     })
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        setCategories([...data.result.data]);
+      })
+      .catch(() => {
+        dispatch(notify("", "Something went wrong!", 5000));
+      });
+  }, [dispatch]);
+
+  const onInitialValue = useCallback(() => {
+    fetch(
+      `/api/blog/content?filter[uid]=${route.params.uid}&show[]=uid&show[]=title&show[]=content&show[]=leftJoin_category_uid`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        const [detail] = data.result.data;
+        if (detail) {
+          setDefaultForm({...detail, category_uid: detail.leftJoin_category_uid});
+        }
+      })
+      .catch(() => {
+        dispatch(notify("", "Something went wrong!", 5000));
+      });
+  }, [dispatch, route.params.uid, setDefaultForm]);
+
+  const onSubmit: ICallbackSubmit = (values, { setSubmitting }) => {
+    fetch(
+      `/api/blog/content/${isEdit ? `edit/${route.params.uid}` : "create"}`,
+      {
+        method: `${isEdit ? "PUT" : "POST"}`,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      }
+    )
       .then((res) => {
         return res.json();
       })
@@ -65,8 +115,15 @@ const Create = () => {
               },
             ])
           );
-          dispatch(fetchBlogContent(blogContent.page, blogContent.sort));
-          dispatch(navigate("/dashboard/blog/content"));
+          dispatch(
+            fetchBlogContent(
+              blogContent.page,
+              blogContent.sort,
+              blogContent.filter,
+              ["uid", "title", "created_at", "updated_at","leftJoin_category_name"]
+            )
+          );
+          navigate("/dashboard/blog/content");
         }
       })
       .catch(() => {
@@ -74,6 +131,16 @@ const Create = () => {
         dispatch(notify("", "Something went wrong!", 5000));
       });
   };
+
+  useEffect(() => {
+    if (oneTime) {
+      setOneTime(false);
+      if (isEdit) {
+        onInitialValue();
+      }
+      onGetCategory();
+    }
+  }, [onInitialValue, oneTime, route.params, isEdit, onGetCategory]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -98,6 +165,21 @@ const Create = () => {
         {!!errors.content ? (
           <p className="help is-danger">{errors.title}</p>
         ) : null}
+      </div>
+
+      <div className="field">
+        <label className="label">Category</label>
+        <div className="select">
+          <select name="category_uid" onChange={handleChange} value={values.category_uid}>
+            <option hidden>Choose:</option>
+            <option value="">--empty--</option>
+            {categories.map((item, key) => (
+              <option key={key} value={item.uid}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="field">
@@ -142,4 +224,4 @@ const Create = () => {
   );
 };
 
-export default Create;
+export default CreateEdit;

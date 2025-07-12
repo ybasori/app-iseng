@@ -1,14 +1,11 @@
-import { useDispatch } from "@src/components/atoms/GlobalState"
-import { navigate } from "@src/_states/reducers/route/route.action";
+import { navigate } from "@src/helper/helper"
 import { useEffect } from "react"
 
 const Redirect:React.FC<{to: string}> = ({to}) =>{
 
-    const dispatch = useDispatch();
-
     useEffect(()=>{
-        dispatch(navigate(to))
-    },[])
+        navigate(to)
+    },[to])
     return <></>
 }
 

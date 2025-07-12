@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "@src/components/atoms/GlobalState"
-import { navigate } from "@src/_states/reducers/route/route.action";
 import { useState } from "react";
 import Link from "../../atoms/Link/Link";
+import { navigate } from "@src/helper/helper";
 
 const Navbar = () => {
     const { auth } = useSelector();
@@ -26,7 +26,7 @@ const Navbar = () => {
                 dispatch({
                     type: "auth/LOGOUT"
                 });
-                dispatch(navigate("/"));
+                navigate("/");
             })
             .catch(error => {
                 setIsLogoutLoading(false);

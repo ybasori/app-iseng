@@ -74,43 +74,77 @@ class Model {
    */
   filterQuery(filter: IFilter, table: string): string[] {
     if (!!filter) {
-      const queries = Object.keys(filter).map((key) => {
-        let filterValue = filter[key];
+      const queries = Object.keys(filter)
+        .filter((item) => {
+          const arrkey = item.split("_");
+          return ((arrkey[0] === "join") || (arrkey[0] === "leftJoin") || (arrkey[0] === "rightJoin")) ? false : true;
+        })
+        .filter((key)=>{
+          let filterValue = filter[key];
 
-        let not = false;
-        let in_query = false;
-        if (!!filterValue["not"]) {
-          not = true;
-          filterValue = filterValue["not"];
-        }
-        if (!!filterValue["in"]) {
-          in_query = true;
-          filterValue = `(${filterValue["in"]
-            .map((item: any) => `'${item}'`)
-            .join(", ")})`;
-        }
+          let checking = true;
+          let empty = false;
 
-        if (filterValue === "null") {
-          if (not) {
-            return `${table}.${key} IS NOT NULL`;
+          while(checking === true){
+            if(typeof filterValue === "object"){
+              if(Array.isArray(filterValue)){
+                if(filterValue.length===0){
+                  empty = true;
+                  checking = false;
+                }
+                else{
+                  checking = false;
+                }
+              }
+              else{
+                filterValue = filterValue['not'] ?? filterValue['in'];
+              }
+            }
+            else{
+              checking = false;
+            }
           }
 
-          return `${table}.${key} IS NULL`;
-        }
+          return !empty;
 
-        if (in_query) {
-          if (not) {
-            return `${table}.${key} NOT IN ${filterValue}`;
+        })
+        .map((key) => {
+          let filterValue = filter[key];
+
+          let not = false;
+          let in_query = false;
+          if (!!filterValue["not"]) {
+            not = true;
+            filterValue = filterValue["not"];
           }
-          return `${table}.${key} IN ${filterValue}`;
-        }
+          if (!!filterValue["in"]) {
+            in_query = true;
+            filterValue = `(${filterValue["in"]
+              .map((item: any) => `'${item}'`)
+              .join(", ")})`;
+          }
 
-        if (not) {
-          return `${table}.${key} NOT LIKE '${filterValue}'`;
-        }
+          if (filterValue === "null") {
+            if (not) {
+              return `${table}.${key} IS NOT NULL`;
+            }
 
-        return `${table}.${key} LIKE '${filterValue}'`;
-      });
+            return `${table}.${key} IS NULL`;
+          }
+
+          if (in_query) {
+            if (not) {
+              return `${table}.${key} NOT IN ${filterValue}`;
+            }
+            return `${table}.${key} IN ${filterValue}`;
+          }
+
+          if (not) {
+            return `${table}.${key} NOT LIKE '${filterValue}'`;
+          }
+
+          return `${table}.${key} LIKE '${filterValue}'`;
+        });
 
       return queries;
     }
@@ -250,6 +284,7 @@ class Model {
 
     for (let i = 0; i < joinArr.length; i++) {
       const name = joinArr[i].name;
+      const joinType = joinArr[i].joinType;
       if (!!relationObj && !!relationObj[name].relatedTo.columns) {
         for (let j = 0; j < relationObj[name].relatedTo.columns.length; j++) {
           if (relationObj[name].relatedTo.columns[j].length === 1) {
@@ -259,6 +294,8 @@ class Model {
                 "." +
                 relationObj[name].relatedTo.columns[j][0] +
                 " AS " +
+                joinType +
+                "_" +
                 name +
                 "_" +
                 relationObj[name].relatedTo.columns[j][0],
@@ -271,6 +308,8 @@ class Model {
                 "." +
                 relationObj[name].relatedTo.columns[j][0] +
                 " AS " +
+                joinType +
+                "_" +
                 name +
                 "_" +
                 relationObj[name].relatedTo.columns[j][1],
@@ -280,7 +319,9 @@ class Model {
       }
     }
 
-    return (sqlJoin.length > 0 ? " , " : "") + sqlJoin.join(" , ");
+    const query = (sqlJoin.length > 0 ? " , " : "") + sqlJoin.join(" , ");
+
+    return query;
   }
 
   joinFilterSqlQuery(
@@ -372,6 +413,16 @@ class Model {
         const sortQuery = this.sortQuery(pagination);
         const paginationQuery = this.paginationQuery(pagination);
 
+        const take_join_from_filter = Object.entries(filter)
+          .filter(([key]) => key.startsWith("join_") || key.startsWith("leftJoin_") || key.startsWith("rightJoin_"))
+          .map(([key, value]) => {
+            return {
+              name: key.replace(/^(leftJoin_|rightJoin_|join_)/, "").split("_")[0],
+              joinType: key.split("_")[0],
+              filter: { [key.replace(/^(leftJoin_|rightJoin_|join_)/, "").split("_")[1]]: value },
+            };
+          });
+
         const joinSql = join.filter(
           (item) =>
             typeof item !== "string" &&
@@ -379,6 +430,25 @@ class Model {
               item.joinType === "leftJoin" ||
               item.joinType === "join")
         ) as unknown as IJoin[];
+
+        const combineJoinSql = [...joinSql, ...take_join_from_filter]
+          .map((item, i, self) => {
+            const nice = self.filter((s) => s.name === item.name && s.joinType === item.joinType);
+
+            let newItem = { ...item };
+
+            nice.forEach((s) => {
+              newItem = {
+                ...newItem,
+                filter: { ...newItem.filter, ...s.filter },
+              };
+            });
+
+            return newItem;
+          })
+          .filter(
+            (item, i, self) => self.findIndex((j) => j.name === item.name && j.joinType === item.joinType) === i
+          );
 
         const joinQuery = this.joinSqlQuery(
           joinSql,
@@ -390,7 +460,7 @@ class Model {
           !!alternativeRelations ? alternativeRelations : this.relations
         );
         const filterJoinQuery = this.joinFilterSqlQuery(
-          joinSql,
+          combineJoinSql as IJoin[],
           !!alternativeRelations ? alternativeRelations : this.relations
           // !!alternativeTable ? alternativeTable : (this.table ?? "")
         );
@@ -405,8 +475,9 @@ class Model {
           " AND "
         )} ${sortQuery} ${paginationQuery}`;
 
-       const timestamp = new Date().toISOString();
-        console.log(`[${timestamp}]\x1b[38;2;255;165;0m[SQL]\x1b[0m ${query}`)
+        const timestamp = new Date().toISOString();
+        console.log(`[${timestamp}]\x1b[38;2;255;165;0m[SQL]\x1b[0m ${query}`);
+        console.log(``);
 
         const [mainResult] = await db.query(query);
 
@@ -416,6 +487,7 @@ class Model {
           const relations = !!alternativeRelations
             ? alternativeRelations
             : this.relations;
+
           const joinResult: any[] = await Promise.all(
             join.map((el) => {
               let joinName = "";
@@ -430,6 +502,11 @@ class Model {
               }
 
               if (
+                ((typeof el !== "string" &&
+                  ["rightJoin", "leftJoin", "join"].indexOf(
+                    el.joinType as any
+                  ) < 0) ||
+                  typeof el === "string") &&
                 !!relations &&
                 (relations[joinName].type === "hasMany" ||
                   relations[joinName].type === "hasOne")
@@ -444,9 +521,9 @@ class Model {
                         .filter(
                           (a) => !!a[relations[joinName].relatedTo.localKey]
                         )
-                        .filter((a, i, s)=> s.findIndex((z)=>a===z)===i)
+                        .filter((a, i, s) => s.findIndex((z) => a === z) === i)
                         .map((a) => a[relations[joinName].relatedTo.localKey])
-                        .filter((a, i, s)=> s.findIndex((z)=>a===z)===i),
+                        .filter((a, i, s) => s.findIndex((z) => a === z) === i),
                     },
                   },
                   join: joinJoin,
@@ -455,7 +532,15 @@ class Model {
                     : null,
                 });
               }
-              if (!!relations && relations[joinName].type === "belongsTo") {
+              if (
+                ((typeof el !== "string" &&
+                  ["rightJoin", "leftJoin", "join"].indexOf(
+                    el.joinType as any
+                  ) < 0) ||
+                  typeof el === "string") &&
+                !!relations &&
+                relations[joinName].type === "belongsTo"
+              ) {
                 return this.getByFilter({
                   db: relations[joinName].relatedTo.database,
                   table: relations[joinName].relatedTo.table,
@@ -466,10 +551,8 @@ class Model {
                         .filter(
                           (a) => !!a[relations[joinName].relatedTo.foreignKey]
                         )
-                        .map(
-                          (a) => a[relations[joinName].relatedTo.foreignKey]
-                        )
-                        .filter((a, i, s)=> s.findIndex((z)=>a===z)===i),
+                        .map((a) => a[relations[joinName].relatedTo.foreignKey])
+                        .filter((a, i, s) => s.findIndex((z) => a === z) === i),
                     },
                   },
                   join: joinJoin,
@@ -516,7 +599,7 @@ class Model {
                 }
                 if (!!relations && relations[joinName].type === "belongsTo") {
                   const [relateDt] = [
-                    ...joinResult[index].filter(
+                    ...(joinResult[index] ?? []).filter(
                       (b: { [x: string]: any }) =>
                         b[relations[joinName].relatedTo.localKey] ===
                         item[relations[joinName].relatedTo.foreignKey]
@@ -533,45 +616,66 @@ class Model {
 
         let jr = [...joinedResult];
 
-        const removeUnshowed = (data: any, joinShow:string[], joinRowStr:string[], subjoin:(string | IJoin)[]) => {
-            
+        const removeUnshowed = (
+          data: any,
+          joinShow: string[],
+          joinRowStr: string[],
+          subjoin: (string | IJoin)[]
+        ) => {
+          if (!!data) {
             Object.keys(data).forEach((key) => {
-                    if (
-                      joinShow.length > 0 &&
-                      !joinShow.includes(key) &&
-                      !joinRowStr.includes(key)
-                    ) {
-                      delete data[key];
-                    } else {
-                        if(typeof data === 'object'){
-                            removeUnshowedNested(data, key, subjoin);
-                        }
-                    }
-                  });
-                  return data
-        }
-
-        const removeUnshowedNested = (item:any,field:string, subjoin:(string | IJoin)[]) => {
-            
-              const joinRow = subjoin
-                .filter((j) => typeof j !== "string")
-                .find((joinItem) => joinItem.name === field);
-
-              if (joinRow) {
-                const joinShow = joinRow.show ?? [];
-                const joinRowStr = (joinRow.join??[]).map((j) =>
-                  typeof j !== "string" ? j.name : j
-                );
-
-                if (Array.isArray(item[field])) {
-                  item[field] = item[field].map((subitem) => removeUnshowed(subitem, joinShow, joinRowStr, joinRow.join ?? []));
-                } else {
-                  item[field] = removeUnshowed(item[field], joinShow, joinRowStr, joinRow.join ?? []);
+              if (
+                joinShow.length > 0 &&
+                !joinShow.includes(key) &&
+                !joinRowStr.includes(key)
+              ) {
+                delete data[key];
+              } else {
+                if (typeof data === "object") {
+                  removeUnshowedNested(data, key, subjoin);
                 }
-            }
+              }
+            });
+          }
+          return data;
+        };
 
-                return item;
-        }
+        const removeUnshowedNested = (
+          item: any,
+          field: string,
+          subjoin: (string | IJoin)[]
+        ) => {
+          const joinRow = subjoin
+            .filter((j) => typeof j !== "string")
+            .find((joinItem) => joinItem.name === field);
+
+          if (joinRow) {
+            const joinShow = joinRow.show ?? [];
+            const joinRowStr = (joinRow.join ?? []).map((j) =>
+              typeof j !== "string" ? j.name : j
+            );
+
+            if (Array.isArray(item[field])) {
+              item[field] = item[field].map((subitem) =>
+                removeUnshowed(
+                  subitem,
+                  joinShow,
+                  joinRowStr,
+                  joinRow.join ?? []
+                )
+              );
+            } else {
+              item[field] = removeUnshowed(
+                item[field],
+                joinShow,
+                joinRowStr,
+                joinRow.join ?? []
+              );
+            }
+          }
+
+          return item;
+        };
 
         const mj = join.map((item) => {
           if (typeof item !== "string") {
@@ -590,9 +694,9 @@ class Model {
             ) {
               delete item[field];
             } else {
-                if(typeof item === 'object'){
+              if (typeof item === "object") {
                 item = removeUnshowedNested(item, field, join);
-                }
+              }
             }
           });
 
@@ -654,9 +758,14 @@ class Model {
       `'${new Date().toISOString()}'`,
     ].join(",");
 
-    return db.query(
-      `INSERT INTO ${this.table} (${columns}) VALUES (${values})`
-    );
+    
+    const query = `INSERT INTO ${this.table} (${columns}) VALUES (${values})`;
+    const timestamp = new Date().toISOString();
+
+    console.log(`[${timestamp}]\x1b[38;2;255;165;0m[SQL]\x1b[0m ${query}`);
+    console.log(``);
+    
+    return db.query(query);
   }
 
   update(payload: any, filter: any) {
@@ -664,14 +773,19 @@ class Model {
     const db = dbs[dbi as keyof typeof dbs];
 
     const set = [
-      ...Object.keys(payload).map((key) => `${key}='${payload[key]}'`),
+      ...Object.keys(payload).map((key) => payload[key]=== null ? `${key}= NULL `: `${key}='${payload[key]}'`),
       `updated_at = '${new Date().toISOString()}'`,
-    ].join(",");
+    ].join(" , ");
     const where = [
       ...Object.keys(filter).map((key) => `${key}='${filter[key]}'`),
-    ].join("AND");
+    ].join(" AND ");
 
-    return db.query(`UPDATE ${this.table} SET ${set} WHERE ${where}`);
+    const query = `UPDATE ${this.table} SET ${set} WHERE ${where}`;
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}]\x1b[38;2;255;165;0m[SQL]\x1b[0m ${query}`);
+    console.log(``);
+
+    return db.query(query);
   }
 }
 export default Model;

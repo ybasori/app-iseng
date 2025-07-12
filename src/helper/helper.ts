@@ -33,3 +33,7 @@ export const expandJSON = (data: { [x: string]: any; }) => {
     }
     return obj;
   };
+
+export const navigate = (path:string) => {
+  window.history.pushState({}, '', path)
+}

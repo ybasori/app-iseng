@@ -4,6 +4,7 @@ export interface ITable{
         name?: string;
         field?: string;
         sortable?: boolean;
+        searchable?: boolean;
         render?: (cell: string | number, row: any) => React.ReactNode;
     }[];
     loading: boolean;
@@ -12,4 +13,8 @@ export interface ITable{
     onPage: (page: {of: number; size:number;}) => void;
     sort?: {by: string; order:  "asc"|"desc";}[]
     onSort?: (sort: {by: string; order: "asc"|"desc";}[]) => void;
+    filter?: any;
+    onFilter?: (filter: any) => void;
+    check?: number[];
+    onCheckChange?: (result: any[]) => void;
 }

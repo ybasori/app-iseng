@@ -1,9 +1,9 @@
 import {
-  fetchBlogContent,
+  fetchBlogCategory,
   setFilter,
   setPage,
   setSort,
-} from "@src/_states/reducers/blogContent/blogContent.action";
+} from "@src/_states/reducers/blogCategory/blogCategory.action";
 import { notify } from "@src/_states/reducers/notif/notif.action";
 import { useDispatch, useSelector } from "@src/components/atoms/GlobalState";
 import Link from "@src/components/atoms/Link/Link";
@@ -11,20 +11,20 @@ import Modal from "@src/components/atoms/Modal/Modal";
 import Table from "@src/components/atoms/Table/Table";
 import { useEffect, useState } from "react";
 
-const Content = () => {
+const Category = () => {
   const [oneTime, setOneTime] = useState(true);
   const [loadContent, setLoadContent] = useState(false);
   const [deleteMoreModal, setDeleteMoreModal] = useState(false);
   const [dataChecked, setDataChecked] = useState<number[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const { blogContent } = useSelector();
+  const { blogCategory } = useSelector();
   const dispatch = useDispatch();
 
   const onDeleteMore = (index: number = 0) => {
     setSubmitting(true);
     fetch(
-      `/api/blog/content/delete/${
-        blogContent.response.result.data[dataChecked[index]].uid
+      `/api/blog/category/delete/${
+        blogCategory.response.result.data[dataChecked[index]].uid
       }`,
       {
         method: "DELETE",
@@ -37,7 +37,7 @@ const Content = () => {
         return res.json();
       })
       .then((data) => {
-        if (index+1 < dataChecked.length) {
+        if (index + 1 < dataChecked.length) {
           onDeleteMore(index + 1);
         } else {
           setSubmitting(false);
@@ -46,7 +46,7 @@ const Content = () => {
           setDataChecked([]);
           dispatch(
             setPage({
-              ...blogContent.page,
+              ...blogCategory.page,
               of: 1,
             })
           );
@@ -59,17 +59,17 @@ const Content = () => {
             ])
           );
           dispatch(
-            fetchBlogContent(
-              blogContent.page,
-              blogContent.sort,
-              blogContent.filter,
-              ["uid", "title", "created_at", "updated_at","leftJoin_category_name"]
+            fetchBlogCategory(
+              blogCategory.page,
+              blogCategory.sort,
+              blogCategory.filter,
+              ["uid", "name", "created_at", "updated_at"]
             )
           );
         }
       })
       .catch((err) => {
-        console.log(err)
+        console.log(err);
         setSubmitting(false);
         dispatch(notify("", "Something went wrong!", 5000));
       });
@@ -78,23 +78,28 @@ const Content = () => {
   useEffect(() => {
     if (oneTime) {
       setOneTime(false);
-      if (!!!blogContent.response) {
+      if (!!!blogCategory.response) {
         setLoadContent(true);
       }
     }
-  }, [blogContent.response, oneTime]);
+  }, [blogCategory.response, oneTime]);
 
   useEffect(() => {
     if (loadContent) {
       setLoadContent(false);
       dispatch(
-        fetchBlogContent(blogContent.page, blogContent.sort, blogContent.filter, ["uid", "title", "created_at", "updated_at","leftJoin_category_name"])
+        fetchBlogCategory(
+          blogCategory.page,
+          blogCategory.sort,
+          blogCategory.filter,
+          ["uid", "name", "created_at", "updated_at"]
+        )
       );
     }
   }, [
-    blogContent.filter,
-    blogContent.page,
-    blogContent.sort,
+    blogCategory.filter,
+    blogCategory.page,
+    blogCategory.sort,
     dispatch,
     loadContent,
   ]);
@@ -112,7 +117,7 @@ const Content = () => {
         </button>
         <Link
           className="button is-success is-small"
-          to="/dashboard/blog/content/create"
+          to="/dashboard/blog/category/create"
         >
           Add
         </Link>
@@ -129,22 +134,22 @@ const Content = () => {
       </div>
 
       <Table
-        sort={blogContent.sort}
+        sort={blogCategory.sort}
         onSort={(s) => {
           dispatch(setSort([...s]));
           setLoadContent(true);
         }}
-        page={blogContent.page}
+        page={blogCategory.page}
         totalPage={
           Math.ceil(
-            blogContent.response?.result.total / blogContent.page.size
+            blogCategory.response?.result.total / blogCategory.page.size
           ) ?? 1
         }
         onPage={(page) => {
           dispatch(setPage(page));
           setLoadContent(true);
         }}
-        filter={blogContent.filter}
+        filter={blogCategory.filter}
         onFilter={(f) => {
           dispatch(setFilter(f));
           setLoadContent(true);
@@ -153,11 +158,10 @@ const Content = () => {
         onCheckChange={(keys) => {
           setDataChecked(keys);
         }}
-        data={!!blogContent.response ? blogContent.response.result.data : []}
+        data={!!blogCategory.response ? blogCategory.response.result.data : []}
         columns={[
-          { name: "Title", field: "title", sortable: true, searchable: true },
-          { name: "Category", field: "leftJoin_category_name", sortable: true, searchable: true },
-          { name: "Author", field: "created_by.name" },
+          { name: "Name", field: "name", sortable: true, searchable: true },
+          { name: "Author", field: "created_by.name", sortable: false },
           {
             name: "Created At",
             field: "created_at",
@@ -177,7 +181,7 @@ const Content = () => {
                 <>
                   <Link
                     className="button is-info is-small"
-                    to={`/dashboard/blog/content/edit/${row.uid}`} 
+                    to={`/dashboard/blog/category/edit/${row.uid}`}
                   >
                     Edit
                   </Link>
@@ -186,7 +190,7 @@ const Content = () => {
             },
           },
         ]}
-        loading={blogContent.loading}
+        loading={blogCategory.loading}
       />
 
       {!!deleteMoreModal ? (
@@ -213,4 +217,4 @@ const Content = () => {
   );
 };
 
-export default Content;
+export default Category;

@@ -1,7 +1,7 @@
 import type { IAction } from "../../types";
-import type { IBlogContentState } from "./blogContent.type";
+import type { IBlogCategoryState } from "./blogCategory.type";
 
-const initialState: IBlogContentState = {
+const initialState: IBlogCategoryState = {
   loading: false,
   response: null,
   error: null,
@@ -14,8 +14,8 @@ const initialState: IBlogContentState = {
   ],
   filter: {}
 };
-const blogContent = (state = initialState, action?: IAction) => {
-  const name = "blogContent";
+const blogCategory = (state = initialState, action?: IAction) => {
+  const name = "blogCategory";
   switch (action?.type) {
     case `${name}/LOADING`:
       return {
@@ -53,4 +53,4 @@ const blogContent = (state = initialState, action?: IAction) => {
   }
 };
 
-export default blogContent;
+export default blogCategory;

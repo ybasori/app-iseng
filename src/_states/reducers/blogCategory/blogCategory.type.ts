@@ -1,4 +1,4 @@
-export interface IBlogContentState {
+export interface IBlogCategoryState {
   loading: boolean;
   response: {
     statusCode: number;

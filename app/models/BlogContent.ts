@@ -4,6 +4,16 @@ class BlogContent extends Model{
     database = "webivert_app";
     table = "blog_contents";
     relations: IRelation = {
+        category: {
+            type: "belongsTo",
+            relatedTo: {
+                database: "webivert_app",
+                table: "blog_categories",
+                foreignKey: "blog_category_id",
+                localKey: "id",
+                columns:[['name'],['uid']]
+            }
+        },
         created_by: {
             type: "belongsTo",
             relatedTo: {

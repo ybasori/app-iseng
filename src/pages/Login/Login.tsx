@@ -1,7 +1,7 @@
 import { useDispatch } from "@src/components/atoms/GlobalState";
-import { navigate } from "@src/_states/reducers/route/route.action";
 import { useState } from "react";
 import { notify } from "@src/_states/reducers/notif/notif.action";
+import { navigate } from "@src/helper/helper";
 
 const Login = () => {
     // const {auth} = useSelector();
@@ -31,7 +31,7 @@ const Login = () => {
                         type: "auth/LOGIN",
                         payload: data.result
                     });
-                    dispatch(navigate("/"));
+                    navigate("/");
 
                 }
               })

@@ -5,6 +5,7 @@ import auth from "./reducers/auth/auth.reducer";
 import route from "./reducers/route/route.reducer";
 import notif from "./reducers/notif/notif.reducer";
 import blogContent from "./reducers/blogContent/blogContent.reducer";
+import blogCategory from "./reducers/blogCategory/blogCategory.reducer";
 
 
 
@@ -15,5 +16,6 @@ export const rootReducer = combineReducers<IAction>({
   auth,
   route,
   notif,
-  blogContent
+  blogContent,
+  blogCategory
 });

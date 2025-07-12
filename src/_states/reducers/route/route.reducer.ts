@@ -7,7 +7,8 @@ const initialState: RouteState = {
   name: "",
   isProtected: false,
   Template: null,
-  component: null
+  component: null,
+  params: null
 }
 const route = (state = initialState, action?: IAction) => {
   const name = "route";

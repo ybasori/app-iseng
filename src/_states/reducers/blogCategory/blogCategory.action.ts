@@ -1,9 +1,9 @@
 import { Thunk } from "@src/_states/types";
 import { expandJSON } from "@src/helper/helper";
 
-const name = "blogContent";
+const name = "blogCategory";
 
-export const fetchBlogContent = (page:{of:number;size:number}, sort:{by:string; order: "asc"|"desc"}[], filter:{[x:string]:any}, show:any[]): Thunk => {
+export const fetchBlogCategory = (page:{of:number;size:number}, sort:{by:string; order: "asc"|"desc"}[], filter:{[x:string]:any}, show:any[]): Thunk => {
   return async (dispatch) => {
     let newFilter = {};
     Object.keys(filter).forEach((item)=>{
@@ -14,7 +14,7 @@ export const fetchBlogContent = (page:{of:number;size:number}, sort:{by:string; 
     dispatch({
       type: `${name}/LOADING`,
     });
-    fetch(`/api/blog/content?${query}`, {
+    fetch(`/api/blog/category?${query}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -38,7 +38,7 @@ export const fetchBlogContent = (page:{of:number;size:number}, sort:{by:string; 
   };
 };
 
-export const addBlogContent = (data:{title:string;content:string}):Thunk=>{
+export const addBlogCategory = (data:{title:string;content:string}):Thunk=>{
     return (dispatch)=>{
         dispatch({
           type: `${name}/ADD`,
