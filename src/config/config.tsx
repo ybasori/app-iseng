@@ -1,15 +1,17 @@
-import Home from '../pages/Home/Home'
-import About from '../pages/About/About';
-import Login from '../pages/Login/Login';
-import TemplateLoggedIn from '../components/organisms/TemplateLoggedIn/TemplateLoggedIn';
-import TemplateDefault from '../components/organisms/TemplateLoggedIn/TemplateLoggedIn';
-import Dashboard from '../pages/Dashboard/Dashboard';
-import TemplateDashboard from '../components/organisms/TemplateDashboard/TemplateDashboard';
-import Blog from '../pages/Dashboard/pages/Blog/Blog';
-import Content from '../pages/Dashboard/pages/Blog/pages/Content/Content';
-import CreateEditContent from '@src/pages/Dashboard/pages/Blog/pages/Content/pages/CreateEdit/CreateEdit';
+import TemplateDefault from '@src/components/organisms/TemplateDefault/TemplateDefault';
+import TemplateDashboard from '@src/components/organisms/TemplateDashboard/TemplateDashboard';
+
+import Home from '@src/pages/Home/Home'
+import About from '@src/pages/About/About';
+import Login from '@src/pages/Login/Login';
+import Dashboard from '@src/pages/Dashboard/Dashboard';
+import Blog from '@src/pages/Dashboard/pages/Blog/Blog';
+import Content from '@src/pages/Dashboard/pages/Blog/pages/Content/Content';
 import Category from '@src/pages/Dashboard/pages/Blog/pages/Category/Category';
+import CreateEditContent from '@src/pages/Dashboard/pages/Blog/pages/Content/pages/CreateEdit/CreateEdit';
 import CategoryCreateEdit from '@src/pages/Dashboard/pages/Blog/pages/Category/page/CategoryCreateEdit';
+import Tag from '@src/pages/Dashboard/pages/Blog/pages/Tag/Tag';
+import TagCreateEdit from '@src/pages/Dashboard/pages/Blog/pages/Tag/page/TagCreateEdit';
 
 export interface IRoute{name: string; Template?: any; component: React.ReactNode; isProtected?:boolean}
 
@@ -50,6 +52,24 @@ export const router:{[path:string]:{name: string; Template?: any; component: Rea
     Template: TemplateDashboard,
     component: <Category />
   },
+  "/dashboard/blog/tag/edit/:uid": {
+    name: "Tag Edit",
+    isProtected: true,
+    Template: TemplateDashboard,
+    component: <TagCreateEdit isEdit />
+  },
+  "/dashboard/blog/tag/create": {
+    name: "Tag Create",
+    isProtected: true,
+    Template: TemplateDashboard,
+    component: <TagCreateEdit />
+  },
+  "/dashboard/blog/tag": {
+    name: "Tag",
+    isProtected: true,
+    Template: TemplateDashboard,
+    component: <Tag />
+  },
   "/dashboard/blog": {
     name: "Blog",
     isProtected: true,
@@ -61,11 +81,6 @@ export const router:{[path:string]:{name: string; Template?: any; component: Rea
     isProtected: true,
     Template: TemplateDashboard,
     component: <Dashboard />
-  },
-  "/profile": {
-    name: "Profile",
-    Template: TemplateLoggedIn,
-    component: <About />
   },
   "/about": {
     name: "About",
@@ -80,13 +95,24 @@ export const router:{[path:string]:{name: string; Template?: any; component: Rea
     name: "404",
     component: <>NOT FOUND</>
   },
-  "/t/:id": {
-    name: "t",
-    component: <>iki</>
-  },
   "/": {
     name: "Home",
     Template: TemplateDefault,
     component: <Home />
   },
+}
+
+export const api = {
+  DASHBOARD_BLOG_CONTENT_LIST: "/api/dashboard/blog/content",
+  DASHBOARD_BLOG_CONTENT_CREATE: "/api/dashboard/blog/content/create",
+  DASHBOARD_BLOG_CONTENT_UPDATE: "/api/dashboard/blog/content/update",
+  DASHBOARD_BLOG_CONTENT_DELETE: "/api/dashboard/blog/content/delete",
+  DASHBOARD_BLOG_CATEGORY_LIST: "/api/dashboard/blog/category",
+  DASHBOARD_BLOG_CATEGORY_CREATE: "/api/dashboard/blog/category/create",
+  DASHBOARD_BLOG_CATEGORY_UPDATE: "/api/dashboard/blog/category/update",
+  DASHBOARD_BLOG_CATEGORY_DELETE: "/api/dashboard/blog/category/delete",
+  DASHBOARD_BLOG_TAG_LIST: "/api/dashboard/blog/tag",
+  DASHBOARD_BLOG_TAG_CREATE: "/api/dashboard/blog/tag/create",
+  DASHBOARD_BLOG_TAG_UPDATE: "/api/dashboard/blog/tag/update",
+  DASHBOARD_BLOG_TAG_DELETE: "/api/dashboard/blog/tag/delete",
 }

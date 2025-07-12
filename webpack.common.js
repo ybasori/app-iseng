@@ -10,7 +10,11 @@ module.exports = {
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".css", ".scss"],
-    plugins: [new TsconfigPathsPlugin()],
+    plugins: [
+      new TsconfigPathsPlugin({
+        configFile: path.resolve(__dirname, "tsconfig.app.json"), // <-- important
+      }),
+    ],
   },
   output: {
     clean: true,
@@ -21,8 +25,15 @@ module.exports = {
     rules: [
       {
         test: /\.(ts|tsx)$/,
-        exclude: [path.resolve("node_modules"), path.resolve(__dirname, "app")],
-        use: ["ts-loader"],
+        exclude: [path.resolve("node_modules")],
+        use: [
+          {
+            loader: "ts-loader",
+            options: {
+              configFile: "tsconfig.app.json",
+            },
+          },
+        ],
       },
       {
         test: /\.(scss|sass|css)$/i,

@@ -2,19 +2,19 @@ import { notify } from "@src/_states/reducers/notif/notif.action";
 import { useDispatch, useSelector } from "@src/components/atoms/GlobalState";
 import useForm, { ICallbackSubmit } from "@src/hooks/useForm";
 import * as yup from "yup";
-import { ICategoryCreateEdit } from "./CategoryCreateEdit.type";
+import { ITagCreateEdit } from "./TagCreateEdit.type";
 import { useCallback, useEffect, useState } from "react";
 import {
-  fetchBlogCategory,
+  fetchBlogTag,
   setPage,
   setSort,
-} from "@src/_states/reducers/blogCategory/blogCategory.action";
+} from "@src/_states/reducers/blogTag/blogTag.action";
 import { navigate } from "@src/helper/helper";
 import { api } from "@src/config/config";
 
-const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
+const TagCreateEdit: React.FC<ITagCreateEdit> = ({ isEdit }) => {
   const [oneTime, setOneTime] = useState(isEdit);
-  const { blogCategory, route } = useSelector();
+  const { blogTag, route } = useSelector();
   const dispatch = useDispatch();
 
   const validation = () => {
@@ -41,7 +41,7 @@ const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
 
   const onInitialValue = useCallback(() => {
     fetch(
-      `${api.DASHBOARD_BLOG_CATEGORY_LIST}?filter[uid]=${route.params.uid}&show[]=uid&show[]=name`,
+      `${api.DASHBOARD_BLOG_TAG_LIST}?filter[uid]=${route.params.uid}&show[]=uid&show[]=name`,
       {
         method: "GET",
         headers: {
@@ -65,7 +65,7 @@ const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
 
   const onSubmit: ICallbackSubmit = (values, { setSubmitting }) => {
     fetch(
-      `${isEdit ? `${api.DASHBOARD_BLOG_CATEGORY_UPDATE}` : `${api.DASHBOARD_BLOG_CATEGORY_CREATE}`}`,
+      `${isEdit ? `${api.DASHBOARD_BLOG_TAG_UPDATE}` : `${api.DASHBOARD_BLOG_TAG_CREATE}`}`,
       {
         method: `${isEdit ? "PUT" : "POST"}`,
         headers: {
@@ -83,7 +83,7 @@ const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
         if (data.statusCode === 200) {
           dispatch(
             setPage({
-              ...blogCategory.page,
+              ...blogTag.page,
               of: 1,
             })
           );
@@ -96,14 +96,14 @@ const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
             ])
           );
           dispatch(
-            fetchBlogCategory(
-              blogCategory.page,
-              blogCategory.sort,
-              blogCategory.filter,
+            fetchBlogTag(
+              blogTag.page,
+              blogTag.sort,
+              blogTag.filter,
               ["uid", "name", "created_at", "updated_at"]
             )
           );
-          navigate("/dashboard/blog/category");
+          navigate("/dashboard/blog/tag");
         }
       })
       .catch(() => {
@@ -117,7 +117,7 @@ const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
       setOneTime(false);
       onInitialValue();
     }
-  }, [onInitialValue, oneTime, route.params]);
+  }, [onInitialValue, oneTime]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -169,4 +169,4 @@ const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
   );
 };
 
-export default CategoryCreateEdit;
+export default TagCreateEdit;

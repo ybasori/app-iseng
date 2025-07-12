@@ -6,8 +6,8 @@
     "dev:server": "npx nodemon",
     "dev:client": "npx webpack serve --config webpack.dev.js",
     "build": "npx webpack --config webpack.prod.js",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "start": "ts-node --project tsconfig.node.json -r tsconfig-paths/register -r ./app/index.ts",
+    "lint": "eslint ."
   },
   "nodemonConfig": {
     "ignore": [
@@ -16,7 +16,7 @@
     "watch": [
       "app"
     ],
-    "exec": "node -r tsconfig-paths/register -r ts-node/register -r ./app/index.ts",
+    "exec": "ts-node --project tsconfig.node.json -r tsconfig-paths/register -r ./app/index.ts",
     "ext": "ts, js"
   },
   "dependencies": {

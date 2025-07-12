@@ -1,0 +1,6 @@
+{
+  "ts-node": {
+    "project": "tsconfig.node.json",
+    "require": ["tsconfig-paths/register"]
+  }
+}

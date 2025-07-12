@@ -10,10 +10,12 @@ import * as yup from "yup";
 import { ICreateEdit } from "./CreateEdit.type";
 import { useCallback, useEffect, useState } from "react";
 import { navigate } from "@src/helper/helper";
+import { api } from "@src/config/config";
 
 const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
   const [oneTime, setOneTime] = useState(true);
   const [categories, setCategories] = useState<any[]>([]);
+  const [tags, setTags] = useState<any[]>([]);
   const { blogContent, route } = useSelector();
   const dispatch = useDispatch();
 
@@ -33,6 +35,7 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
     isValid,
     handleChange,
     setDefaultForm,
+    setFieldValue,
   } = useForm({
     initialValues: {
       title: "",
@@ -42,7 +45,7 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
   });
 
   const onGetCategory = useCallback(() => {
-    fetch(`/api/blog/category?show[]=uid&show[]=name`, {
+    fetch(`${api.DASHBOARD_BLOG_CATEGORY_LIST}?show[]=uid&show[]=name`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -59,9 +62,27 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
       });
   }, [dispatch]);
 
+  const onGetTag = useCallback(() => {
+    fetch(`${api.DASHBOARD_BLOG_TAG_LIST}?show[]=uid&show[]=name`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        setTags([...data.result.data]);
+      })
+      .catch(() => {
+        dispatch(notify("", "Something went wrong!", 5000));
+      });
+  }, [dispatch]);
+
   const onInitialValue = useCallback(() => {
     fetch(
-      `/api/blog/content?filter[uid]=${route.params.uid}&show[]=uid&show[]=title&show[]=content&show[]=leftJoin_category_uid`,
+      `${api.DASHBOARD_BLOG_CONTENT_LIST}?filter[uid]=${route.params.uid}&show[]=uid&show[]=title&show[]=content&show[]=leftJoin_category_uid`,
       {
         method: "GET",
         headers: {
@@ -75,7 +96,11 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
       .then((data) => {
         const [detail] = data.result.data;
         if (detail) {
-          setDefaultForm({...detail, category_uid: detail.leftJoin_category_uid});
+          setDefaultForm({
+            ...detail,
+            category_uid: detail.leftJoin_category_uid,
+            tag_uid: detail.content_tag.map((item:{tag:{uid:string; name:string;}})=>({value: item.tag.uid, label: item.tag.name}))
+          });
         }
       })
       .catch(() => {
@@ -85,13 +110,18 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
 
   const onSubmit: ICallbackSubmit = (values, { setSubmitting }) => {
     fetch(
-      `/api/blog/content/${isEdit ? `edit/${route.params.uid}` : "create"}`,
+      `${isEdit ? `${api.DASHBOARD_BLOG_CONTENT_UPDATE}` : `${api.DASHBOARD_BLOG_CONTENT_CREATE}`}`,
       {
         method: `${isEdit ? "PUT" : "POST"}`,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          ...values,
+          tag_uid: [
+            ...values.tag_uid.map((item: { value: string }) => item.value),
+          ],
+        }),
       }
     )
       .then((res) => {
@@ -120,7 +150,13 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
               blogContent.page,
               blogContent.sort,
               blogContent.filter,
-              ["uid", "title", "created_at", "updated_at","leftJoin_category_name"]
+              [
+                "uid",
+                "title",
+                "created_at",
+                "updated_at",
+                "leftJoin_category_name",
+              ]
             )
           );
           navigate("/dashboard/blog/content");
@@ -139,8 +175,9 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
         onInitialValue();
       }
       onGetCategory();
+      onGetTag();
     }
-  }, [onInitialValue, oneTime, route.params, isEdit, onGetCategory]);
+  }, [onInitialValue, oneTime, route.params, isEdit, onGetCategory, onGetTag]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -170,14 +207,70 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
       <div className="field">
         <label className="label">Category</label>
         <div className="select">
-          <select name="category_uid" onChange={handleChange} value={values.category_uid}>
-            <option hidden>Choose:</option>
+          <select
+            name="category_uid"
+            onChange={handleChange}
+            value={values.category_uid}
+          >
             <option value="">--empty--</option>
             {categories.map((item, key) => (
               <option key={key} value={item.uid}>
                 {item.name}
               </option>
             ))}
+          </select>
+        </div>
+      </div>
+      <div className="field">
+        <label className="label">Tag</label>
+        <div className={`control `}>
+          {(values?.tag_uid ?? []).map(
+            (item: { label: string; value: string }, key: number) => (
+              <span className="tag is-success" key={key}>
+                {item.label}
+                <button
+                  className="delete is-small"
+                  type="button"
+                  onClick={() =>
+                    setFieldValue("tag_uid", [
+                      ...values.tag_uid.filter(
+                        (e: { value: string }) => e.value !== item.value
+                      ),
+                    ])
+                  }
+                ></button>
+              </span>
+            )
+          )}
+        </div>
+        <div className="select">
+          <select
+            name="tag_uid"
+            onChange={(e) => {
+              setFieldValue("tag_uid", [
+                ...(values?.tag_uid ?? []),
+                {
+                  value: e.currentTarget.value,
+                  label: tags.find((item) => item.uid === e.currentTarget.value)
+                    .name,
+                },
+              ]);
+            }}
+            value={""}
+          >
+            <option value="">--empty--</option>
+            {tags
+              .filter(
+                (item) =>
+                  (values.tag_uid ?? []).findIndex(
+                    (sitem: { value: string }) => sitem.value === item.uid
+                  ) < 0
+              )
+              .map((item, key) => (
+                <option key={key} value={item.uid}>
+                  {item.name}
+                </option>
+              ))}
           </select>
         </div>
       </div>

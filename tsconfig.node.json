@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "paths": {
+      "@app/*":["./app/*"],
+    }
+  },
+  "include": ["app"],
+  "exclude": ["node_modules"]
+}

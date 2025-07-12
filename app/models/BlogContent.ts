@@ -14,6 +14,27 @@ class BlogContent extends Model{
                 columns:[['name'],['uid']]
             }
         },
+        content_tag: {
+            type: "hasMany",
+            relatedTo: {
+                database: "webivert_app",
+                table: "blog_content_tags",
+                foreignKey: "blog_content_id",
+                localKey: "id",
+                relations: {
+                    tag: {
+                        type: "belongsTo",
+                        relatedTo: {
+                            database: "webivert_app",
+                            table: "blog_tags",
+                            foreignKey: "blog_tag_id",
+                            localKey: "id",
+                            columns:[['name'],['uid']]
+                        }
+                    }
+                }
+            }
+        },
         created_by: {
             type: "belongsTo",
             relatedTo: {

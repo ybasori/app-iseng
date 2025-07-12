@@ -23,7 +23,7 @@ const TemplateDashboard: React.FC<{ children: React.ReactNode }> = ({ children }
                                             <li><Link to="/dashboard/blog">Main</Link></li>
                                             <li><Link to="/dashboard/blog/content">Contents</Link></li>
                                             <li><Link to="/dashboard/blog/category">Categories</Link></li>
-                                            <li><a>Tags</a></li>
+                                            <li><Link to="/dashboard/blog/tag">Tags</Link></li>
                                         </ul>
                                     </li>
                                 </ul>

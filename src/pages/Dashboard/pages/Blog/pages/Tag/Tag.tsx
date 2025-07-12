@@ -1,9 +1,9 @@
 import {
-  fetchBlogContent,
+  fetchBlogTag,
   setFilter,
   setPage,
   setSort,
-} from "@src/_states/reducers/blogContent/blogContent.action";
+} from "@src/_states/reducers/blogTag/blogTag.action";
 import { notify } from "@src/_states/reducers/notif/notif.action";
 import { useDispatch, useSelector } from "@src/components/atoms/GlobalState";
 import Link from "@src/components/atoms/Link/Link";
@@ -12,20 +12,20 @@ import Table from "@src/components/atoms/Table/Table";
 import { api } from "@src/config/config";
 import { useEffect, useState } from "react";
 
-const Content = () => {
+const Tag = () => {
   const [oneTime, setOneTime] = useState(true);
   const [loadContent, setLoadContent] = useState(false);
   const [deleteMoreModal, setDeleteMoreModal] = useState(false);
   const [dataChecked, setDataChecked] = useState<number[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const { blogContent } = useSelector();
+  const { blogTag } = useSelector();
   const dispatch = useDispatch();
 
   const onDeleteMore = (index: number = 0) => {
     setSubmitting(true);
     fetch(
-      `${api.DASHBOARD_BLOG_CONTENT_DELETE}/${
-        blogContent.response.result.data[dataChecked[index]].uid
+      `${api.DASHBOARD_BLOG_TAG_DELETE}/${
+        blogTag.response.result.data[dataChecked[index]].uid
       }`,
       {
         method: "DELETE",
@@ -38,7 +38,7 @@ const Content = () => {
         return res.json();
       })
       .then((data) => {
-        if (index+1 < dataChecked.length) {
+        if (index + 1 < dataChecked.length) {
           onDeleteMore(index + 1);
         } else {
           setSubmitting(false);
@@ -47,7 +47,7 @@ const Content = () => {
           setDataChecked([]);
           dispatch(
             setPage({
-              ...blogContent.page,
+              ...blogTag.page,
               of: 1,
             })
           );
@@ -60,17 +60,17 @@ const Content = () => {
             ])
           );
           dispatch(
-            fetchBlogContent(
-              blogContent.page,
-              blogContent.sort,
-              blogContent.filter,
-              ["uid", "title", "created_at", "updated_at","leftJoin_category_name"]
-            )
+            fetchBlogTag(blogTag.page, blogTag.sort, blogTag.filter, [
+              "uid",
+              "name",
+              "created_at",
+              "updated_at",
+            ])
           );
         }
       })
       .catch((err) => {
-        console.log(err)
+        console.log(err);
         setSubmitting(false);
         dispatch(notify("", "Something went wrong!", 5000));
       });
@@ -79,26 +79,25 @@ const Content = () => {
   useEffect(() => {
     if (oneTime) {
       setOneTime(false);
-      if (!!!blogContent.response) {
+      if (!!!blogTag.response) {
         setLoadContent(true);
       }
     }
-  }, [blogContent.response, oneTime]);
+  }, [blogTag.response, oneTime]);
 
   useEffect(() => {
     if (loadContent) {
       setLoadContent(false);
       dispatch(
-        fetchBlogContent(blogContent.page, blogContent.sort, blogContent.filter, ["uid", "title", "created_at", "updated_at","leftJoin_category_name"])
+        fetchBlogTag(blogTag.page, blogTag.sort, blogTag.filter, [
+          "uid",
+          "name",
+          "created_at",
+          "updated_at",
+        ])
       );
     }
-  }, [
-    blogContent.filter,
-    blogContent.page,
-    blogContent.sort,
-    dispatch,
-    loadContent,
-  ]);
+  }, [blogTag.filter, blogTag.page, blogTag.sort, dispatch, loadContent]);
 
   return (
     <>
@@ -113,7 +112,7 @@ const Content = () => {
         </button>
         <Link
           className="button is-success is-small"
-          to="/dashboard/blog/content/create"
+          to="/dashboard/blog/tag/create"
         >
           Add
         </Link>
@@ -130,22 +129,20 @@ const Content = () => {
       </div>
 
       <Table
-        sort={blogContent.sort}
+        sort={blogTag.sort}
         onSort={(s) => {
           dispatch(setSort([...s]));
           setLoadContent(true);
         }}
-        page={blogContent.page}
+        page={blogTag.page}
         totalPage={
-          Math.ceil(
-            blogContent.response?.result.total / blogContent.page.size
-          ) ?? 1
+          Math.ceil(blogTag.response?.result.total ?? 1 / blogTag.page.size) ?? 1
         }
         onPage={(page) => {
           dispatch(setPage(page));
           setLoadContent(true);
         }}
-        filter={blogContent.filter}
+        filter={blogTag.filter}
         onFilter={(f) => {
           dispatch(setFilter(f));
           setLoadContent(true);
@@ -154,14 +151,10 @@ const Content = () => {
         onCheckChange={(keys) => {
           setDataChecked(keys);
         }}
-        data={!!blogContent.response ? blogContent.response.result.data : []}
+        data={!!blogTag.response ? blogTag.response.result.data : []}
         columns={[
-          { name: "Title", field: "title", sortable: true, searchable: true },
-          { name: "Category", field: "leftJoin_category_name", sortable: true, searchable: true },
-          { name: "Tags", render:(_cell, row)=>{
-            return <>{row?.content_tag.map((item:{tag:{name:string}}, i:number, self:any[])=><><a>{item.tag.name}</a>{i+i!==self.length?<>, </>:null}</>) ?? ""}</>
-          } },
-          { name: "Author", field: "created_by.name" },
+          { name: "Name", field: "name", sortable: true, searchable: true },
+          { name: "Author", field: "created_by.name", sortable: false },
           {
             name: "Created At",
             field: "created_at",
@@ -181,7 +174,7 @@ const Content = () => {
                 <>
                   <Link
                     className="button is-info is-small"
-                    to={`/dashboard/blog/content/edit/${row.uid}`} 
+                    to={`/dashboard/blog/tag/edit/${row.uid}`}
                   >
                     Edit
                   </Link>
@@ -190,7 +183,7 @@ const Content = () => {
             },
           },
         ]}
-        loading={blogContent.loading}
+        loading={blogTag.loading}
       />
 
       {!!deleteMoreModal ? (
@@ -217,4 +210,4 @@ const Content = () => {
   );
 };
 
-export default Content;
+export default Tag;

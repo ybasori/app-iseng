@@ -19,55 +19,85 @@ const routes: IRoute[] = [
         controller: authController.logout,
       },
       {
-        path: "/blog",
+        path: "/dashboard",
         children: [
           {
-            path: "/content",
+            path: "/blog",
             children: [
               {
-                path: "/",
-                method: "get",
-                controller: blogController.listContent,
+                path: "/content",
+                children: [
+                  {
+                    path: "/",
+                    method: "get",
+                    controller: blogController.listContent,
+                  },
+                  {
+                    path: "/create",
+                    method: "post",
+                    controller: blogController.createContent,
+                  },
+                  {
+                    path: "/edit/:uid",
+                    method: "put",
+                    controller: blogController.updateContent,
+                  },
+                  {
+                    path: "/delete/:uid",
+                    method: "delete",
+                    controller: blogController.deleteContent,
+                  },
+                ],
               },
               {
-                path: "/create",
-                method: "post",
-                controller: blogController.createContent,
+                path: "/category",
+                children: [
+                  {
+                    path: "/",
+                    method: "get",
+                    controller: blogController.listCategory,
+                  },
+                  {
+                    path: "/create",
+                    method: "post",
+                    controller: blogController.createCategory,
+                  },
+                  {
+                    path: "/edit/:uid",
+                    method: "put",
+                    controller: blogController.updateCategory,
+                  },
+                  {
+                    path: "/delete/:uid",
+                    method: "delete",
+                    controller: blogController.deleteCategory,
+                  },
+                ],
               },
               {
-                path: "/edit/:uid",
-                method: "put",
-                controller: blogController.updateContent,
-              },
-              {
-                path: "/delete/:uid",
-                method: "delete",
-                controller: blogController.deleteContent,
-              },
-            ],
-          },
-          {
-            path: "/category",
-            children: [
-              {
-                path: "/",
-                method: "get",
-                controller: blogController.listCategory,
-              },
-              {
-                path: "/create",
-                method: "post",
-                controller: blogController.createCategory,
-              },
-              {
-                path: "/edit/:uid",
-                method: "put",
-                controller: blogController.updateCategory,
-              },
-              {
-                path: "/delete/:uid",
-                method: "delete",
-                controller: blogController.deleteCategory,
+                path: "/tag",
+                children: [
+                  {
+                    path: "/",
+                    method: "get",
+                    controller: blogController.listTag,
+                  },
+                  {
+                    path: "/create",
+                    method: "post",
+                    controller: blogController.createTag,
+                  },
+                  {
+                    path: "/edit/:uid",
+                    method: "put",
+                    controller: blogController.updateTag,
+                  },
+                  {
+                    path: "/delete/:uid",
+                    method: "delete",
+                    controller: blogController.deleteTag,
+                  },
+                ],
               },
             ],
           },

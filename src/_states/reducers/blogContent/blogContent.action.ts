@@ -1,4 +1,5 @@
 import { Thunk } from "@src/_states/types";
+import { api } from "@src/config/config";
 import { expandJSON } from "@src/helper/helper";
 
 const name = "blogContent";
@@ -14,7 +15,7 @@ export const fetchBlogContent = (page:{of:number;size:number}, sort:{by:string; 
     dispatch({
       type: `${name}/LOADING`,
     });
-    fetch(`/api/blog/content?${query}`, {
+    fetch(`${api.DASHBOARD_BLOG_CONTENT_LIST}?${query}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -24,10 +25,18 @@ export const fetchBlogContent = (page:{of:number;size:number}, sort:{by:string; 
         return res.json();
       })
       .then((data) => {
-        dispatch({
-          type: `${name}/SUCCESS`,
-          payload: data,
-        });
+        if(data.statusCode < 400){
+          dispatch({
+            type: `${name}/SUCCESS`,
+            payload: data,
+          });
+        }
+        else{
+          dispatch({
+            type: `${name}/ERROR`,
+            payload: data,
+          });
+        }
       })
       .catch((err) => {
         dispatch({

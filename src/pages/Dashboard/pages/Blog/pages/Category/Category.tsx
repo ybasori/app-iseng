@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "@src/components/atoms/GlobalState";
 import Link from "@src/components/atoms/Link/Link";
 import Modal from "@src/components/atoms/Modal/Modal";
 import Table from "@src/components/atoms/Table/Table";
+import { api } from "@src/config/config";
 import { useEffect, useState } from "react";
 
 const Category = () => {
@@ -23,7 +24,7 @@ const Category = () => {
   const onDeleteMore = (index: number = 0) => {
     setSubmitting(true);
     fetch(
-      `/api/blog/category/delete/${
+      `${api.DASHBOARD_BLOG_CATEGORY_DELETE}/${
         blogCategory.response.result.data[dataChecked[index]].uid
       }`,
       {

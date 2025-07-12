@@ -481,6 +481,7 @@ class Model {
 
         const [mainResult] = await db.query(query);
 
+
         let joinedResult = [...(mainResult as unknown[] as any[])];
 
         if (!!join && joinedResult.length > 0) {
@@ -781,6 +782,21 @@ class Model {
     ].join(" AND ");
 
     const query = `UPDATE ${this.table} SET ${set} WHERE ${where}`;
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}]\x1b[38;2;255;165;0m[SQL]\x1b[0m ${query}`);
+    console.log(``);
+
+    return db.query(query);
+  }
+  delete(filter: any) {
+    const dbi = this.database ?? "";
+    const db = dbs[dbi as keyof typeof dbs];
+
+    const where = [
+      ...Object.keys(filter).map((key) => `${key}='${filter[key]}'`),
+    ].join(" AND ");
+
+    const query = `DELETE FROM ${this.table} WHERE ${where}`;
     const timestamp = new Date().toISOString();
     console.log(`[${timestamp}]\x1b[38;2;255;165;0m[SQL]\x1b[0m ${query}`);
     console.log(``);
