@@ -8,11 +8,12 @@ const Notif: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <>
       {children}
+      <div style={{position: "fixed", bottom: 16, right: 16, minWidth: 270}}>
       {notif.notifications.map(
         (item: { id: string; title: string; text: string; hide: boolean }, key:number) => (
           <div className={`message ${item.hide ? "is-hidden" : ""}`} key={key}>
             <div className="message-header">
-              Info
+              {(!!item.title&&item.title!==""?item.title:"Info")}
               <button
                 className="delete"
                 type="button"
@@ -23,6 +24,7 @@ const Notif: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
         )
       )}
+      </div>
     </>
   );
 };

@@ -12,10 +12,16 @@ import CreateEditContent from '@src/pages/Dashboard/pages/Blog/pages/Content/pag
 import CategoryCreateEdit from '@src/pages/Dashboard/pages/Blog/pages/Category/page/CategoryCreateEdit';
 import Tag from '@src/pages/Dashboard/pages/Blog/pages/Tag/Tag';
 import TagCreateEdit from '@src/pages/Dashboard/pages/Blog/pages/Tag/page/TagCreateEdit';
+import PublicBlogContent from '@src/pages/Blog/pages/Content/PublicBlogContent';
 
 export interface IRoute{name: string; Template?: any; component: React.ReactNode; isProtected?:boolean}
 
 export const router:{[path:string]:{name: string; Template?: any; component: React.ReactNode; isProtected?:boolean}} = {
+  "/blog/content/:uid":{
+    name: "Content",
+    Template:TemplateDefault,
+    component:<PublicBlogContent />
+  },
   "/dashboard/blog/content/edit/:uid": {
     name: "Edit Content",
     isProtected: true,
@@ -103,6 +109,7 @@ export const router:{[path:string]:{name: string; Template?: any; component: Rea
 }
 
 export const api = {
+  PUBLIC_BLOG_CONTENT_LIST: "/api/blog/content",
   DASHBOARD_BLOG_CONTENT_LIST: "/api/dashboard/blog/content",
   DASHBOARD_BLOG_CONTENT_CREATE: "/api/dashboard/blog/content/create",
   DASHBOARD_BLOG_CONTENT_UPDATE: "/api/dashboard/blog/content/update",

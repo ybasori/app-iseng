@@ -10,7 +10,7 @@ import {
   setSort,
 } from "@src/_states/reducers/blogTag/blogTag.action";
 import { navigate } from "@src/helper/helper";
-import { api } from "@src/config/config";
+import { api } from "../../../../../../../_config/config";
 
 const TagCreateEdit: React.FC<ITagCreateEdit> = ({ isEdit }) => {
   const [oneTime, setOneTime] = useState(isEdit);
@@ -65,7 +65,7 @@ const TagCreateEdit: React.FC<ITagCreateEdit> = ({ isEdit }) => {
 
   const onSubmit: ICallbackSubmit = (values, { setSubmitting }) => {
     fetch(
-      `${isEdit ? `${api.DASHBOARD_BLOG_TAG_UPDATE}` : `${api.DASHBOARD_BLOG_TAG_CREATE}`}`,
+      `${isEdit ? `${api.DASHBOARD_BLOG_TAG_UPDATE}/${route.params.uid}` : `${api.DASHBOARD_BLOG_TAG_CREATE}`}`,
       {
         method: `${isEdit ? "PUT" : "POST"}`,
         headers: {

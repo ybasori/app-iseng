@@ -7,8 +7,9 @@ import Redirect from "./components/atoms/Redirect/Redirect";
 import Notif from "./components/atoms/Notif/Notif";
 import { ErrorBoundary } from "./components/atoms/ErrorBoundary/ErrorBoundary";
 import { usePathname } from "./hooks/usePathname";
-import { router } from "./config/config";
+import { router } from "./_config/config";
 import { match } from "path-to-regexp";
+import FacebookProvider from "./components/atoms/FacebookProvier/FacebookProvider";
 
 const Template: React.FC<{ Component?: any; children: React.ReactNode }> = ({
   Component,
@@ -73,6 +74,7 @@ function App() {
     <ErrorBoundary>
       <GlobalState>
         <Notif>
+          <FacebookProvider />
           <PageNavigate />
         </Notif>
       </GlobalState>

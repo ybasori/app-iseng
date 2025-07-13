@@ -1,5 +1,5 @@
 import { Thunk } from "@src/_states/types";
-import { api } from "@src/config/config";
+import { api } from "../../../_config/config";
 import { expandJSON } from "@src/helper/helper";
 
 const name = "blogContent";

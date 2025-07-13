@@ -9,8 +9,8 @@ import { useDispatch, useSelector } from "@src/components/atoms/GlobalState";
 import Link from "@src/components/atoms/Link/Link";
 import Modal from "@src/components/atoms/Modal/Modal";
 import Table from "@src/components/atoms/Table/Table";
-import { api } from "@src/config/config";
-import { useEffect, useState } from "react";
+import { api } from "../../../../../../_config/config";
+import React, { useEffect, useState } from "react";
 
 const Content = () => {
   const [oneTime, setOneTime] = useState(true);
@@ -38,7 +38,7 @@ const Content = () => {
         return res.json();
       })
       .then((data) => {
-        if (index+1 < dataChecked.length) {
+        if (index + 1 < dataChecked.length) {
           onDeleteMore(index + 1);
         } else {
           setSubmitting(false);
@@ -64,13 +64,19 @@ const Content = () => {
               blogContent.page,
               blogContent.sort,
               blogContent.filter,
-              ["uid", "title", "created_at", "updated_at","leftJoin_category_name"]
+              [
+                "uid",
+                "title",
+                "created_at",
+                "updated_at",
+                "leftJoin_category_name",
+              ]
             )
           );
         }
       })
       .catch((err) => {
-        console.log(err)
+        console.log(err);
         setSubmitting(false);
         dispatch(notify("", "Something went wrong!", 5000));
       });
@@ -89,7 +95,12 @@ const Content = () => {
     if (loadContent) {
       setLoadContent(false);
       dispatch(
-        fetchBlogContent(blogContent.page, blogContent.sort, blogContent.filter, ["uid", "title", "created_at", "updated_at","leftJoin_category_name"])
+        fetchBlogContent(
+          blogContent.page,
+          blogContent.sort,
+          blogContent.filter,
+          ["uid", "title", "created_at", "updated_at", "leftJoin_category_name"]
+        )
       );
     }
   }, [
@@ -157,10 +168,33 @@ const Content = () => {
         data={!!blogContent.response ? blogContent.response.result.data : []}
         columns={[
           { name: "Title", field: "title", sortable: true, searchable: true },
-          { name: "Category", field: "leftJoin_category_name", sortable: true, searchable: true },
-          { name: "Tags", render:(_cell, row)=>{
-            return <>{row?.content_tag.map((item:{tag:{name:string}}, i:number, self:any[])=><><a>{item.tag.name}</a>{i+i!==self.length?<>, </>:null}</>) ?? ""}</>
-          } },
+          {
+            name: "Category",
+            field: "leftJoin_category_name",
+            sortable: true,
+            searchable: true,
+          },
+          {
+            name: "Tags",
+            render: (_cell, row) => {
+              return (
+                <>
+                  {row?.content_tag.data.map(
+                    (
+                      item: { tag: { name: string } },
+                      i: number,
+                      self: any[]
+                    ) => (
+                      <React.Fragment key={i}>
+                        <a>{item.tag.name}</a>
+                        {self.length-1 !== i ? ", ":""}
+                      </React.Fragment>
+                    )
+                  ) ?? ""}
+                </>
+              );
+            },
+          },
           { name: "Author", field: "created_by.name" },
           {
             name: "Created At",
@@ -181,7 +215,7 @@ const Content = () => {
                 <>
                   <Link
                     className="button is-info is-small"
-                    to={`/dashboard/blog/content/edit/${row.uid}`} 
+                    to={`/dashboard/blog/content/edit/${row.uid}`}
                   >
                     Edit
                   </Link>

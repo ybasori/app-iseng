@@ -10,7 +10,7 @@ import * as yup from "yup";
 import { ICreateEdit } from "./CreateEdit.type";
 import { useCallback, useEffect, useState } from "react";
 import { navigate } from "@src/helper/helper";
-import { api } from "@src/config/config";
+import { api } from "../../../../../../../../_config/config";
 
 const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
   const [oneTime, setOneTime] = useState(true);
@@ -99,7 +99,7 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
           setDefaultForm({
             ...detail,
             category_uid: detail.leftJoin_category_uid,
-            tag_uid: detail.content_tag.map((item:{tag:{uid:string; name:string;}})=>({value: item.tag.uid, label: item.tag.name}))
+            tag_uid: detail.content_tag.data.map((item:{tag:{uid:string; name:string;}})=>({value: item.tag.uid, label: item.tag.name}))
           });
         }
       })
@@ -110,7 +110,7 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
 
   const onSubmit: ICallbackSubmit = (values, { setSubmitting }) => {
     fetch(
-      `${isEdit ? `${api.DASHBOARD_BLOG_CONTENT_UPDATE}` : `${api.DASHBOARD_BLOG_CONTENT_CREATE}`}`,
+      `${isEdit ? `${api.DASHBOARD_BLOG_CONTENT_UPDATE}/${route.params.uid}` : `${api.DASHBOARD_BLOG_CONTENT_CREATE}`}`,
       {
         method: `${isEdit ? "PUT" : "POST"}`,
         headers: {
@@ -119,7 +119,7 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
         body: JSON.stringify({
           ...values,
           tag_uid: [
-            ...values.tag_uid.map((item: { value: string }) => item.value),
+            ...(values.tag_uid??[]).map((item: { value: string }) => item.value),
           ],
         }),
       }

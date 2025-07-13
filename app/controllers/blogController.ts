@@ -9,6 +9,60 @@ import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
 const blogController = {
+  listContentPublic: async (req: Request, res: Response) => {
+    try {
+      let filter = {};
+      let pagination = {};
+      let show: any[] = [];
+      const query = convertToObj(req.query);
+
+      if (!!query.page) {
+        pagination = { ...pagination, page: query.page };
+      }
+
+      if (!!query.sort) {
+        pagination = { ...pagination, sort: query.sort };
+      }
+      if (!!query.filter) {
+        filter = { ...filter, ...(query.filter as any) };
+      }
+      if (!!query.show) {
+        show = [...show, ...(query.show as any)];
+      }
+      const blogContentModel = new BlogContent();
+      const blogContents = await blogContentModel.getByFilter({
+        filter: {
+          deleted_at: "null",
+          ...filter,
+        },
+        pagination,
+        join: [
+          { name: "content_tag", join: ["tag"]},
+          { name: "category", show: ["name"] },
+          { name: "created_by", show: ["name"] },
+        ],
+        show,
+      });
+      const [[blogContentTotal]] = await blogContentModel.countByFilter({filter:{
+        deleted_at: "null",
+        ...filter,
+      }});
+      return res.status(200).json({
+        statusCode: 200,
+        message: "Success!",
+        result: {
+          data: blogContents,
+          total: blogContentTotal.total,
+        },
+      });
+    } catch (err: any) {
+      console.log(err);
+      return res.status(500).json({
+        statusCode: 500,
+        message: err.message,
+      });
+    }
+  },
   listContent: async (req: Request, res: Response) => {
     try {
       const token = req.cookies.token;
@@ -45,18 +99,18 @@ const blogController = {
         },
         pagination,
         join: [
-          { name: "content_tag", join: ["tag"]},
+          { name: "content_tag", join: ["tag"], },
           { name: "category", joinType: "leftJoin", show: ["name"] },
           { name: "category", show: ["name"] },
           { name: "created_by", show: ["name"] },
         ],
         show,
       });
-      const [[blogContentTotal]] = await blogContentModel.countByFilter({
+      const [[blogContentTotal]] = await blogContentModel.countByFilter({filter:{
         created_by_user_id: decoded.id,
         deleted_at: "null",
         ...filter,
-      });
+      }});
       return res.status(200).json({
         statusCode: 200,
         message: "Success!",
@@ -279,7 +333,7 @@ const blogController = {
       const blogContentModel = new BlogContent();
       await blogContentModel.update(
         {
-          deleted_at: new Date().toISOString(),
+          deleted_at: new Date().toISOString().replace('T', ' ').replace('Z', '').slice(0, 19),
         },
         {
           uid: req.params.uid,
@@ -335,11 +389,11 @@ const blogController = {
         join: [{ name: "created_by", show: ["name"] }],
         show,
       });
-      const [[blogContentTotal]] = await blogContentModel.countByFilter({
+      const [[blogContentTotal]] = await blogContentModel.countByFilter({filter:{
         created_by_user_id: decoded.id,
         deleted_at: "null",
         ...filter,
-      });
+      }});
       return res.status(200).json({
         statusCode: 200,
         message: "Success!",
@@ -465,7 +519,7 @@ const blogController = {
       const blogContentModel = new BlogCategory();
       await blogContentModel.update(
         {
-          deleted_at: new Date().toISOString(),
+          deleted_at: new Date().toISOString().replace('T', ' ').replace('Z', '').slice(0, 19),
         },
         {
           uid: req.params.uid,
@@ -521,11 +575,11 @@ const blogController = {
         join: [{ name: "created_by", show: ["name"] }],
         show,
       });
-      const [[blogContentTotal]] = await blogContentModel.countByFilter({
+      const [[blogContentTotal]] = await blogContentModel.countByFilter({filter:{
         created_by_user_id: decoded.id,
         deleted_at: "null",
         ...filter,
-      });
+      }});
       return res.status(200).json({
         statusCode: 200,
         message: "Success!",
@@ -651,7 +705,7 @@ const blogController = {
       const blogContentModel = new BlogTag();
       await blogContentModel.update(
         {
-          deleted_at: new Date().toISOString(),
+          deleted_at: new Date().toISOString().replace('T', ' ').replace('Z', '').slice(0, 19),
         },
         {
           uid: req.params.uid,

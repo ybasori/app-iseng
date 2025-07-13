@@ -10,7 +10,7 @@ import {
   setSort,
 } from "@src/_states/reducers/blogCategory/blogCategory.action";
 import { navigate } from "@src/helper/helper";
-import { api } from "@src/config/config";
+import { api } from "../../../../../../../_config/config";
 
 const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
   const [oneTime, setOneTime] = useState(isEdit);
@@ -65,7 +65,7 @@ const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
 
   const onSubmit: ICallbackSubmit = (values, { setSubmitting }) => {
     fetch(
-      `${isEdit ? `${api.DASHBOARD_BLOG_CATEGORY_UPDATE}` : `${api.DASHBOARD_BLOG_CATEGORY_CREATE}`}`,
+      `${isEdit ? `${api.DASHBOARD_BLOG_CATEGORY_UPDATE}/${route.params.uid}` : `${api.DASHBOARD_BLOG_CATEGORY_CREATE}`}`,
       {
         method: `${isEdit ? "PUT" : "POST"}`,
         headers: {

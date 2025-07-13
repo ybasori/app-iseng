@@ -2,9 +2,9 @@ import { Thunk } from "@src/_states/types";
 import { api } from "../../../_config/config";
 import { expandJSON } from "@src/helper/helper";
 
-const name = "blogTag";
+const name = "publicBlogContentDetail";
 
-export const fetchBlogTag = (page:{of:number;size:number}, sort:{by:string; order: "asc"|"desc"}[], filter:{[x:string]:any}, show:any[]): Thunk => {
+export const fetchPublicBlogContentDetail = (page:{of:number;size:number}, sort:{by:string; order: "asc"|"desc"}[], filter:{[x:string]:any}, show:any[]): Thunk => {
   return async (dispatch) => {
     let newFilter = {};
     Object.keys(filter).forEach((item)=>{
@@ -15,7 +15,7 @@ export const fetchBlogTag = (page:{of:number;size:number}, sort:{by:string; orde
     dispatch({
       type: `${name}/LOADING`,
     });
-    fetch(`${api.DASHBOARD_BLOG_TAG_LIST}?${query}`, {
+    fetch(`${api.PUBLIC_BLOG_CONTENT_LIST}?${query}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -47,7 +47,7 @@ export const fetchBlogTag = (page:{of:number;size:number}, sort:{by:string; orde
   };
 };
 
-export const addBlogCategory = (data:{title:string;content:string}):Thunk=>{
+export const addBlogContent = (data:{title:string;content:string}):Thunk=>{
     return (dispatch)=>{
         dispatch({
           type: `${name}/ADD`,

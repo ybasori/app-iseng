@@ -7,6 +7,8 @@ import notif from "./reducers/notif/notif.reducer";
 import blogContent from "./reducers/blogContent/blogContent.reducer";
 import blogCategory from "./reducers/blogCategory/blogCategory.reducer";
 import blogTag from "./reducers/blogTag/blogTag.reducer";
+import publicBlogContent from "./reducers/publicBlogContent/publicBlogContent.reducer";
+import publicBlogContentDetail from "./reducers/publicBlogContentDetail/publicBlogContentDetail.reducer";
 
 
 
@@ -19,5 +21,7 @@ export const rootReducer = combineReducers<IAction>({
   notif,
   blogContent,
   blogCategory,
-  blogTag
+  blogTag,
+  publicBlogContent,
+  publicBlogContentDetail
 });

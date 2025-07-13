@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from "@src/components/atoms/GlobalState";
 import Link from "@src/components/atoms/Link/Link";
 import Modal from "@src/components/atoms/Modal/Modal";
 import Table from "@src/components/atoms/Table/Table";
-import { api } from "@src/config/config";
+import { api } from "../../../../../../_config/config";
 import { useEffect, useState } from "react";
 
 const Category = () => {

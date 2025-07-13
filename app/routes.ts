@@ -38,7 +38,7 @@ const routes: IRoute[] = [
                     controller: blogController.createContent,
                   },
                   {
-                    path: "/edit/:uid",
+                    path: "/update/:uid",
                     method: "put",
                     controller: blogController.updateContent,
                   },
@@ -63,7 +63,7 @@ const routes: IRoute[] = [
                     controller: blogController.createCategory,
                   },
                   {
-                    path: "/edit/:uid",
+                    path: "/update/:uid",
                     method: "put",
                     controller: blogController.updateCategory,
                   },
@@ -88,7 +88,7 @@ const routes: IRoute[] = [
                     controller: blogController.createTag,
                   },
                   {
-                    path: "/edit/:uid",
+                    path: "/update/:uid",
                     method: "put",
                     controller: blogController.updateTag,
                   },
@@ -104,6 +104,16 @@ const routes: IRoute[] = [
         ],
       },
       {
+        path: "/blog",
+        children:[
+            {
+                path: "/content",
+                method: "get",
+                controller: blogController.listContentPublic,
+            },
+        ]
+      },
+      {
         path: "/{*any}",
         method: "all",
         controller: (_req: Request, res: Response) => {
@@ -115,6 +125,11 @@ const routes: IRoute[] = [
       },
     ],
   },
+//   {
+//     path: "/",
+//     method: "get",
+//     controller: homeController.any,
+//   },
   {
     path: "/{*any}",
     method: "get",
