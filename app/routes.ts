@@ -111,6 +111,16 @@ const routes: IRoute[] = [
                 method: "get",
                 controller: blogController.listContentPublic,
             },
+            {
+                path: "/comment",
+                method: "get",
+                controller: blogController.listCommentPublic,
+            },
+            {
+                path: "/comment/store",
+                method: "post",
+                controller: blogController.storeCommentPublic,
+            },
         ]
       },
       {

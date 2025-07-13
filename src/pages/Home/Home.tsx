@@ -72,14 +72,20 @@ function Home() {
                       key: number
                     ) => (
                       <React.Fragment key={key}>
-                        <h1 className="title"><Link to={`/blog/content/${item.uid}`}>{item.title}</Link></h1>
+                        <h1 className="title">
+                          <Link to={`/blog/content/${item.uid}`}>
+                            {item.title}
+                          </Link>
+                        </h1>
                         <p className="subtitle">
                           My first website with <strong>Bulma</strong>!
+                        </p>
+                        <p className="has-text-grey-lighter is-size-6">
+                          {item.created_at}
                         </p>
                         <div
                           dangerouslySetInnerHTML={{ __html: item.content }}
                         />
-                        <p>{item.created_at}</p>
                       </React.Fragment>
                     )
                   )}
@@ -99,10 +105,12 @@ function Home() {
                     e.preventDefault();
 
                     if (publicBlogContent.page.of > 1) {
-                      dispatch(setPage({
-                        ...publicBlogContent.page,
-                        of: publicBlogContent.page.of - 1,
-                      }));
+                      dispatch(
+                        setPage({
+                          ...publicBlogContent.page,
+                          of: publicBlogContent.page.of - 1,
+                        })
+                      );
 
                       setLoadContent(true);
                     }
@@ -130,10 +138,12 @@ function Home() {
                           publicBlogContent.page.size
                       ) ?? 1)
                     ) {
-                      dispatch(setPage({
-                        ...publicBlogContent.page,
-                        of: publicBlogContent.page.of + 1,
-                      }));
+                      dispatch(
+                        setPage({
+                          ...publicBlogContent.page,
+                          of: publicBlogContent.page.of + 1,
+                        })
+                      );
 
                       setLoadContent(true);
                     }
@@ -191,7 +201,9 @@ function Home() {
                           aria-label={`Goto page ${item}`}
                           onClick={(e) => {
                             e.preventDefault();
-                            dispatch(setPage({ ...publicBlogContent.page, of: item }));
+                            dispatch(
+                              setPage({ ...publicBlogContent.page, of: item })
+                            );
 
                             setLoadContent(true);
                           }}

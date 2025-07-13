@@ -25,7 +25,7 @@ interface IJoin {
   filter?: IFilter;
   join?: (IJoin | string)[];
   show?: string[];
-  pagination?: IPagination
+  pagination?: IPagination;
 }
 
 export interface IRelation {
@@ -73,11 +73,10 @@ class Model {
    * @property {string[]} in - it can be more than one value
    * @returns {string[]}
    */
-  filterQuery(filter: IFilter, table: string, debug?:any): string[] {
+  filterQuery(filter: IFilter, table: string, debug?: any): string[] {
     if (!!filter) {
-
-      if(!!debug){
-        console.log(filter)
+      if (!!debug) {
+        console.log(filter);
       }
 
       const queries = Object.keys(filter)
@@ -116,7 +115,6 @@ class Model {
         })
         .map((key) => {
           let filterValue = filter[key];
-
 
           let not = false;
           let in_query = false;
@@ -387,24 +385,27 @@ class Model {
    * @returns
    */
 
-  getByFilter({
-    db: alternativeDb,
-    table: alternativeTable,
-    filter,
-    pagination,
-    join = [],
-    relations: alternativeRelations = null,
-    show = [],
-  }: {
-    db?: string;
-    table?: string;
-    filter: IFilter;
-    pagination?: IPagination;
-    join?: (IJoin | string)[];
-    relations?: IRelation | null;
-    show?: string[];
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  }, debug?: any): Promise<any[]> {
+  getByFilter(
+    {
+      db: alternativeDb,
+      table: alternativeTable,
+      filter,
+      pagination,
+      join = [],
+      relations: alternativeRelations = null,
+      show = [],
+    }: {
+      db?: string;
+      table?: string;
+      filter: IFilter;
+      pagination?: IPagination;
+      join?: (IJoin | string)[];
+      relations?: IRelation | null;
+      show?: string[];
+    },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    debug?: any
+  ): Promise<any[]> {
     return new Promise(async (resolve, reject) => {
       try {
         const dbi = !!alternativeDb
@@ -532,7 +533,7 @@ class Model {
                   ) < 0) ||
                   typeof el === "string") &&
                 !!relations &&
-                (relations[joinName].type === "hasOne")
+                relations[joinName].type === "hasOne"
               ) {
                 return this.getByFilter({
                   db: relations[joinName].relatedTo.database,
@@ -588,7 +589,6 @@ class Model {
             })
           );
 
-
           joinedResult = [
             ...joinedResult.map((item) => {
               let dt = { ...item };
@@ -625,75 +625,77 @@ class Model {
             }),
           ];
 
-          for(let z=0; z<joinedResult.length; z++){
+          for (let z = 0; z < joinedResult.length; z++) {
             const item = joinedResult[z];
-            const getAllData = await Promise.all([...join.map((el)=>{
-              let joinName = "";
-              let joinFilter = {};
-              let joinPagination = undefined;
-              let joinJoin: IJoin[] = [];
-              if (typeof el === "string") {
-                joinName = el;
-              } else {
-                joinName = el.name;
-                joinFilter = el.filter ?? {};
-                joinPagination = el.pagination ?? {};
-                joinJoin = el.join as IJoin[];
-              }
+            const getAllData = await Promise.all([
+              ...join.map((el) => {
+                let joinName = "";
+                let joinFilter = {};
+                let joinPagination = undefined;
+                let joinJoin: IJoin[] = [];
+                if (typeof el === "string") {
+                  joinName = el;
+                } else {
+                  joinName = el.name;
+                  joinFilter = el.filter ?? {};
+                  joinPagination = el.pagination ?? {};
+                  joinJoin = el.join as IJoin[];
+                }
                 if (!!relations && relations[joinName].type === "hasMany") {
                   return this.getByFilter({
                     db: relations[joinName].relatedTo.database,
                     table: relations[joinName].relatedTo.table,
                     filter: {
-                      [relations[joinName].relatedTo.foreignKey]: item[relations[joinName].relatedTo.localKey],
-                      ...joinFilter
+                      [relations[joinName].relatedTo.foreignKey]:
+                        item[relations[joinName].relatedTo.localKey],
+                      ...joinFilter,
                     },
                     join: joinJoin,
                     relations: !!relations[joinName].relatedTo.relations
-                    ? relations[joinName].relatedTo.relations
-                    : null,
-                    pagination: joinPagination
-                  })
+                      ? relations[joinName].relatedTo.relations
+                      : null,
+                    pagination: joinPagination,
+                  });
                 }
                 return new Promise((resolve) => resolve([]));
-            })]);
-            const countAllData = await Promise.all([...join.map((el)=>{
-              let joinName = "";
-              let joinFilter = {};
-              if (typeof el === "string") {
-                joinName = el;
-              } else {
-                joinName = el.name;
-                joinFilter = el.filter ?? {};
-              }
+              }),
+            ]);
+            const countAllData = await Promise.all([
+              ...join.map((el) => {
+                let joinName = "";
+                let joinFilter = {};
+                if (typeof el === "string") {
+                  joinName = el;
+                } else {
+                  joinName = el.name;
+                  joinFilter = el.filter ?? {};
+                }
                 if (!!relations && relations[joinName].type === "hasMany") {
                   return this.countByFilter({
                     db: relations[joinName].relatedTo.database,
                     table: relations[joinName].relatedTo.table,
                     filter: {
-                      [relations[joinName].relatedTo.foreignKey]: item[relations[joinName].relatedTo.localKey],
-                      ...joinFilter
-                    }
-                  })
+                      [relations[joinName].relatedTo.foreignKey]:
+                        item[relations[joinName].relatedTo.localKey],
+                      ...joinFilter,
+                    },
+                  });
                 }
                 return new Promise((resolve) => resolve([]));
-            })])
+              }),
+            ]);
 
-
-            join.forEach((j, index)=>{
-              const joinName = typeof j ==="string"?j:j.name;
+            join.forEach((j, index) => {
+              const joinName = typeof j === "string" ? j : j.name;
 
               if (!!relations && relations[joinName].type === "hasMany") {
                 const data = getAllData[index];
-                const [[{total}]] = countAllData[index];
-                joinedResult[z][joinName] = {...item[joinName], data, total}
+                const [[{ total }]] = countAllData[index];
+                joinedResult[z][joinName] = { ...item[joinName], data, total };
               }
-            })
-
+            });
           }
-
         }
-
 
         let jr = [...joinedResult];
 
@@ -795,17 +797,20 @@ class Model {
     });
   }
 
-  countByFilter({
-    filter,
-    join = [],
-    db: alternativeDb,
-    table: alternativeTable,
-  }: {
-    filter: any;
-    join?: IJoin[];
-    db?: string;
-    table?: string;
-  }, debug?:any): any {
+  countByFilter(
+    {
+      filter,
+      join = [],
+      db: alternativeDb,
+      table: alternativeTable,
+    }: {
+      filter: any;
+      join?: IJoin[];
+      db?: string;
+      table?: string;
+    },
+    debug?: any
+  ): any {
     const dbi = !!alternativeDb
       ? alternativeDb
       : !!this.database
@@ -815,21 +820,63 @@ class Model {
 
     const filterQuery = this.filterQuery(
       { ...filter },
-      !!alternativeTable ? alternativeTable : this.table ?? "", !!debug
+      !!alternativeTable ? alternativeTable : this.table ?? "",
+      !!debug
     );
 
-    if(!!debug){
+    if (!!debug) {
       console.log("=======", filterQuery);
     }
 
+    const take_join_from_filter = Object.entries(filter)
+      .filter(
+        ([key]) =>
+          key.startsWith("join_") ||
+          key.startsWith("leftJoin_") ||
+          key.startsWith("rightJoin_")
+      )
+      .map(([key, value]) => {
+        return {
+          name: key.replace(/^(leftJoin_|rightJoin_|join_)/, "").split("_")[0],
+          joinType: key.split("_")[0],
+          filter: {
+            [key.replace(/^(leftJoin_|rightJoin_|join_)/, "").split("_")[1]]:
+              value,
+          },
+        };
+      });
+
     const joinSql = join.filter(
       (item) =>
-        item.joinType === "rightJoin" ||
-        item.joinType === "leftJoin" ||
-        item.joinType === "join"
-    );
+        typeof item !== "string" &&
+        (item.joinType === "rightJoin" ||
+          item.joinType === "leftJoin" ||
+          item.joinType === "join")
+    ) as unknown as IJoin[];
 
-    
+    const combineJoinSql = [...joinSql, ...take_join_from_filter]
+      .map((item, i, self) => {
+        const nice = self.filter(
+          (s) => s.name === item.name && s.joinType === item.joinType
+        );
+
+        let newItem = { ...item };
+
+        nice.forEach((s) => {
+          newItem = {
+            ...newItem,
+            filter: { ...newItem.filter, ...s.filter },
+          };
+        });
+
+        return newItem;
+      })
+      .filter(
+        (item, i, self) =>
+          self.findIndex(
+            (j) => j.name === item.name && j.joinType === item.joinType
+          ) === i
+      );
 
     const joinQuery = this.joinSqlQuery(
       joinSql,
@@ -837,7 +884,7 @@ class Model {
       !!alternativeTable ? alternativeTable : this.table ?? ""
     );
     const filterJoinQuery = this.joinFilterSqlQuery(
-      joinSql,
+      combineJoinSql as IJoin[],
       this.relations
       // this.table ?? ""
     );

@@ -1,6 +1,7 @@
 import { convertToObj, promisify } from "@app/helper";
 import Validator from "@app/helper/Validator";
 import BlogCategory from "@app/models/BlogCategory";
+import BlogComment from "@app/models/BlogComment";
 import BlogContent from "@app/models/BlogContent";
 import BlogContentTag from "@app/models/BlogContentTag";
 import BlogTag from "@app/models/BlogTag";
@@ -9,6 +10,166 @@ import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
 const blogController = {
+  listCommentPublic: async (req:Request, res:Response) => {
+    
+    try {
+
+      let filter = {};
+      let pagination = {};
+      let show: any[] = [];
+      const query = convertToObj(req.query);
+
+      if (!!query.page) {
+        pagination = { ...pagination, page: query.page };
+      }
+
+      if (!!query.sort) {
+        pagination = { ...pagination, sort: query.sort };
+      }
+      if (!!query.filter) {
+        filter = { ...filter, ...(query.filter as any) };
+      }
+      if (!!query.show) {
+        show = [...show, ...(query.show as any)];
+      }
+      const blogContentModel = new BlogComment();
+      const blogContents = await blogContentModel.getByFilter({
+        filter: {
+          deleted_at: "null",
+          ...filter,
+        },
+        pagination,
+        join: [
+          { name: "content", joinType: "leftJoin", show: ["uid"] },
+        ],
+        show,
+      });
+      const [[blogContentTotal]] = await blogContentModel.countByFilter({
+        filter: {
+          deleted_at: "null",
+          ...filter,
+        },
+        join: [
+          { name: "content", joinType: "leftJoin", show: ["uid"] },
+        ],
+      });
+      return res.status(200).json({
+        statusCode: 200,
+        message: "Success!",
+        result: {
+          data: blogContents,
+          total: blogContentTotal.total,
+        },
+      });
+    } catch (err: any) {
+      console.log(err);
+      return res.status(500).json({
+        statusCode: 500,
+        message: err.message,
+      });
+    }
+  },
+  storeCommentPublic: async (req: Request, res: Response) => {
+    try {
+      const uid = uuidv4();
+      const rules = {
+        name: {
+          label: "Name",
+          rule: {
+            required: true,
+          },
+        },
+        email: {
+          label: "E-mail",
+          rule: {
+            required: true,
+          },
+        },
+        comment: {
+          label: "Comment",
+          rule: {
+            required: true,
+          },
+        },
+        content_uid: {
+          label: "Content",
+          rule: {
+            required: true,
+          },
+        },
+      };
+      const validate = await Validator.make(req.body, rules);
+      if (validate.fails()) {
+        return res.status(400).json({
+          statusCode: 400,
+          message: "Bad request!",
+          error: validate.getMessages(),
+        });
+      }
+
+      let optionalInputWithRelation = {};
+      if (!!req.cookies.token) {
+        const decoded: any = await promisify(jwt.verify)(
+          req.cookies.token,
+          process.env.SECRET_KEY ?? ""
+        );
+
+        optionalInputWithRelation = {
+          ...optionalInputWithRelation,
+          created_by_user_id: decoded.id,
+        };
+      }
+      if (!!req.body.comment_id) {
+        const blogCommentModel = new BlogComment();
+
+        const [blogComment] = await blogCommentModel.getByFilter({
+          filter: {
+            uid: req.body.comment_uid,
+          },
+        });
+
+        optionalInputWithRelation = {
+          ...optionalInputWithRelation,
+          blog_comment_id: blogComment.id,
+        };
+      }
+
+      const blogContentModel = new BlogContent();
+
+      const [blogContent] = await blogContentModel.getByFilter({
+        filter: {
+          uid: req.body.content_uid,
+        },
+      });
+
+      const blogCommentModel = new BlogComment();
+
+      await blogCommentModel.store({
+        uid,
+        name: req.body.name,
+        email: req.body.email,
+        comment: req.body.comment,
+        blog_content_id: blogContent.id,
+        ...optionalInputWithRelation,
+      });
+
+      const [blogComment] = await blogCommentModel.getByFilter({
+        filter: { uid },
+      });
+
+      return res.status(200).json({
+        statusCode: 200,
+        message: "Success!",
+        result: blogComment,
+      });
+    } catch (err: any) {
+      console.log(err);
+      return res.status(500).json({
+        statusCode: 500,
+        message: err.message,
+      });
+    }
+  },
   listContentPublic: async (req: Request, res: Response) => {
     try {
       let filter = {};
@@ -37,16 +198,18 @@ const blogController = {
         },
         pagination,
         join: [
-          { name: "content_tag", join: ["tag"]},
+          { name: "content_tag", join: ["tag"] },
           { name: "category", show: ["name"] },
           { name: "created_by", show: ["name"] },
         ],
         show,
       });
-      const [[blogContentTotal]] = await blogContentModel.countByFilter({filter:{
-        deleted_at: "null",
-        ...filter,
-      }});
+      const [[blogContentTotal]] = await blogContentModel.countByFilter({
+        filter: {
+          deleted_at: "null",
+          ...filter,
+        },
+      });
       return res.status(200).json({
         statusCode: 200,
         message: "Success!",
@@ -99,18 +262,20 @@ const blogController = {
         },
         pagination,
         join: [
-          { name: "content_tag", join: ["tag"], },
+          { name: "content_tag", join: ["tag"] },
           { name: "category", joinType: "leftJoin", show: ["name"] },
           { name: "category", show: ["name"] },
           { name: "created_by", show: ["name"] },
         ],
         show,
       });
-      const [[blogContentTotal]] = await blogContentModel.countByFilter({filter:{
-        created_by_user_id: decoded.id,
-        deleted_at: "null",
-        ...filter,
-      }});
+      const [[blogContentTotal]] = await blogContentModel.countByFilter({
+        filter: {
+          created_by_user_id: decoded.id,
+          deleted_at: "null",
+          ...filter,
+        },
+      });
       return res.status(200).json({
         statusCode: 200,
         message: "Success!",
@@ -195,18 +360,17 @@ const blogController = {
           filter: {
             created_by_user_id: decoded.id,
             uid: {
-              in: req.body.tag_uid
+              in: req.body.tag_uid,
             },
           },
         });
 
-        blogTags.forEach((item:{id:number})=>{
-
+        blogTags.forEach((item: { id: number }) => {
           blogContentTagModel.store({
             blog_content_id: blogContent.id,
-            blog_tag_id: item.id
-          })
-        })
+            blog_tag_id: item.id,
+          });
+        });
       }
 
       return res.status(200).json({
@@ -288,7 +452,7 @@ const blogController = {
 
       const blogContentTagModel = new BlogContentTag();
       blogContentTagModel.delete({
-        blog_content_id: blogContent.id
+        blog_content_id: blogContent.id,
       });
       if (!!req.body.tag_uid && req.body.tag_uid.length > 0) {
         const blogTagModel = new BlogTag();
@@ -297,18 +461,17 @@ const blogController = {
           filter: {
             created_by_user_id: decoded.id,
             uid: {
-              in: req.body.tag_uid
+              in: req.body.tag_uid,
             },
           },
         });
 
-        blogTags.forEach((item:{id:number})=>{
-
+        blogTags.forEach((item: { id: number }) => {
           blogContentTagModel.store({
             blog_content_id: blogContent.id,
-            blog_tag_id: item.id
-          })
-        })
+            blog_tag_id: item.id,
+          });
+        });
       }
       return res.status(200).json({
         statusCode: 200,
@@ -333,7 +496,11 @@ const blogController = {
       const blogContentModel = new BlogContent();
       await blogContentModel.update(
         {
-          deleted_at: new Date().toISOString().replace('T', ' ').replace('Z', '').slice(0, 19),
+          deleted_at: new Date()
+            .toISOString()
+            .replace("T", " ")
+            .replace("Z", "")
+            .slice(0, 19),
         },
         {
           uid: req.params.uid,
@@ -389,11 +556,13 @@ const blogController = {
         join: [{ name: "created_by", show: ["name"] }],
         show,
       });
-      const [[blogContentTotal]] = await blogContentModel.countByFilter({filter:{
-        created_by_user_id: decoded.id,
-        deleted_at: "null",
-        ...filter,
-      }});
+      const [[blogContentTotal]] = await blogContentModel.countByFilter({
+        filter: {
+          created_by_user_id: decoded.id,
+          deleted_at: "null",
+          ...filter,
+        },
+      });
       return res.status(200).json({
         statusCode: 200,
         message: "Success!",
@@ -519,7 +688,11 @@ const blogController = {
       const blogContentModel = new BlogCategory();
       await blogContentModel.update(
         {
-          deleted_at: new Date().toISOString().replace('T', ' ').replace('Z', '').slice(0, 19),
+          deleted_at: new Date()
+            .toISOString()
+            .replace("T", " ")
+            .replace("Z", "")
+            .slice(0, 19),
         },
         {
           uid: req.params.uid,
@@ -575,11 +748,13 @@ const blogController = {
         join: [{ name: "created_by", show: ["name"] }],
         show,
       });
-      const [[blogContentTotal]] = await blogContentModel.countByFilter({filter:{
-        created_by_user_id: decoded.id,
-        deleted_at: "null",
-        ...filter,
-      }});
+      const [[blogContentTotal]] = await blogContentModel.countByFilter({
+        filter: {
+          created_by_user_id: decoded.id,
+          deleted_at: "null",
+          ...filter,
+        },
+      });
       return res.status(200).json({
         statusCode: 200,
         message: "Success!",
@@ -705,7 +880,11 @@ const blogController = {
       const blogContentModel = new BlogTag();
       await blogContentModel.update(
         {
-          deleted_at: new Date().toISOString().replace('T', ' ').replace('Z', '').slice(0, 19),
+          deleted_at: new Date()
+            .toISOString()
+            .replace("T", " ")
+            .replace("Z", "")
+            .slice(0, 19),
         },
         {
           uid: req.params.uid,

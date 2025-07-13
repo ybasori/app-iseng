@@ -110,6 +110,8 @@ export const router:{[path:string]:{name: string; Template?: any; component: Rea
 
 export const api = {
   PUBLIC_BLOG_CONTENT_LIST: "/api/blog/content",
+  PUBLIC_BLOG_COMMENT_LIST: "/api/blog/comment",
+  PUBLIC_BLOG_COMMENT_STORE: "/api/blog/comment/store",
   DASHBOARD_BLOG_CONTENT_LIST: "/api/dashboard/blog/content",
   DASHBOARD_BLOG_CONTENT_CREATE: "/api/dashboard/blog/content/create",
   DASHBOARD_BLOG_CONTENT_UPDATE: "/api/dashboard/blog/content/update",
