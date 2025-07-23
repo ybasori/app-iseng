@@ -99,6 +99,21 @@ const routes: IRoute[] = [
                   },
                 ],
               },
+              {
+                path: "/comment",
+                children: [
+                  {
+                    path: "/",
+                    method: "get",
+                    controller: blogController.listComment,
+                  },
+                  // {
+                  //   path: "/delete/:uid",
+                  //   method: "delete",
+                  //   controller: blogController.deleteComment,
+                  // },
+                ],
+              },
             ],
           },
         ],

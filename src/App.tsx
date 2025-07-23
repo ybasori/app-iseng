@@ -1,7 +1,7 @@
-import GlobalState, {
-  useDispatch,
-  useSelector,
-} from "./components/atoms/GlobalState";
+// import GlobalState, {
+//   useDispatch,
+//   useSelector,
+// } from "./components/atoms/GlobalState";
 import { useEffect } from "react";
 import Redirect from "./components/atoms/Redirect/Redirect";
 import Notif from "./components/atoms/Notif/Notif";
@@ -10,6 +10,10 @@ import { usePathname } from "./hooks/usePathname";
 import { router } from "./_config/config";
 import { match } from "path-to-regexp";
 import FacebookProvider from "./components/atoms/FacebookProvier/FacebookProvider";
+
+
+import { RootState, store } from './_states/store'
+import { Provider, useDispatch, useSelector } from 'react-redux'
 
 const Template: React.FC<{ Component?: any; children: React.ReactNode }> = ({
   Component,
@@ -22,7 +26,7 @@ const Template: React.FC<{ Component?: any; children: React.ReactNode }> = ({
 };
 
 const PageNavigate = () => {
-  const { route, auth } = useSelector();
+  const { route, auth } = useSelector((state: RootState) => state);
   const dispatch = useDispatch();
 
   const pathname = usePathname();
@@ -72,12 +76,12 @@ const PageNavigate = () => {
 function App() {
   return (
     <ErrorBoundary>
-      <GlobalState>
+      <Provider store={store}>
         <Notif>
           <FacebookProvider />
           <PageNavigate />
         </Notif>
-      </GlobalState>
+        </Provider>
     </ErrorBoundary>
   );
 }

@@ -10,10 +10,8 @@ import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
 const blogController = {
-  listCommentPublic: async (req:Request, res:Response) => {
-    
+  listComment: async (req: Request, res: Response) => {
     try {
-
       let filter = {};
       let pagination = {};
       let show: any[] = [];
@@ -40,7 +38,18 @@ const blogController = {
         },
         pagination,
         join: [
-          { name: "content", joinType: "leftJoin", show: ["uid"] },
+          {
+            name: "content",
+            joinType: "leftJoin",
+            show: ["uid", "title"],
+            join: [
+              {
+                name: "author",
+                joinType: "leftJoin",
+                show: ["uid", "name"],
+              },
+            ],
+          },
         ],
         show,
       });
@@ -50,8 +59,65 @@ const blogController = {
           ...filter,
         },
         join: [
-          { name: "content", joinType: "leftJoin", show: ["uid"] },
+          {
+            name: "content",
+            joinType: "leftJoin",
+            show: ["uid"],
+          },
         ],
+      });
+      return res.status(200).json({
+        statusCode: 200,
+        message: "Success!",
+        result: {
+          data: blogContents,
+          total: blogContentTotal.total,
+        },
+      });
+    } catch (err: any) {
+      console.log(err);
+      return res.status(500).json({
+        statusCode: 500,
+        message: err.message,
+      });
+    }
+  },
+  listCommentPublic: async (req: Request, res: Response) => {
+    try {
+      let filter = {};
+      let pagination = {};
+      let show: any[] = [];
+      const query = convertToObj(req.query);
+
+      if (!!query.page) {
+        pagination = { ...pagination, page: query.page };
+      }
+
+      if (!!query.sort) {
+        pagination = { ...pagination, sort: query.sort };
+      }
+      if (!!query.filter) {
+        filter = { ...filter, ...(query.filter as any) };
+      }
+      if (!!query.show) {
+        show = [...show, ...(query.show as any)];
+      }
+      const blogContentModel = new BlogComment();
+      const blogContents = await blogContentModel.getByFilter({
+        filter: {
+          deleted_at: "null",
+          ...filter,
+        },
+        pagination,
+        join: [{ name: "content", joinType: "leftJoin", show: ["uid"] }],
+        show,
+      });
+      const [[blogContentTotal]] = await blogContentModel.countByFilter({
+        filter: {
+          deleted_at: "null",
+          ...filter,
+        },
+        join: [{ name: "content", joinType: "leftJoin", show: ["uid"] }],
       });
       return res.status(200).json({
         statusCode: 200,

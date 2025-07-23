@@ -219,65 +219,85 @@ class Model {
     let sqlJoin = "";
 
     for (let i = 0; i < joinArr.length; i++) {
+      const name = joinArr[i].name;
+      const joinType = joinArr[i].joinType;
+      const aliasTable = joinType + "_" + name;
       if (!!relationObj && relationObj[joinArr[i].name].type === "belongsTo") {
         sqlJoin =
           sqlJoin +
           " " +
-          (joinArr[i].joinType === "leftJoin"
+          (joinType === "leftJoin"
             ? "LEFT JOIN"
-            : joinArr[i].joinType === "rightJoin"
+            : joinType === "rightJoin"
             ? "RIGHT JOIN"
             : "JOIN") +
           " " +
-          relationObj[joinArr[i].name].relatedTo.table +
+          relationObj[name].relatedTo.table +
+          " AS " +
+          aliasTable +
           " ON " +
-          relationObj[joinArr[i].name].relatedTo.table +
+          aliasTable +
           "." +
-          relationObj[joinArr[i].name].relatedTo.localKey +
+          relationObj[name].relatedTo.localKey +
           " = " +
           parentTable +
           "." +
-          relationObj[joinArr[i].name].relatedTo.foreignKey;
+          relationObj[name].relatedTo.foreignKey;
       }
-      if (!!relationObj && relationObj[joinArr[i].name].type === "hasMany") {
+      if (!!relationObj && relationObj[name].type === "hasMany") {
         sqlJoin =
           sqlJoin +
           " " +
-          (joinArr[i].joinType === "leftJoin"
+          (joinType === "leftJoin"
             ? "LEFT JOIN"
-            : joinArr[i].joinType === "rightJoin"
+            : joinType === "rightJoin"
             ? "RIGHT JOIN"
             : "JOIN") +
           " " +
-          relationObj[joinArr[i].name].relatedTo.table +
+          relationObj[name].relatedTo.table +
+          " AS " +
+          aliasTable +
           " ON " +
-          relationObj[joinArr[i].name].relatedTo.table +
+          aliasTable +
           "." +
-          relationObj[joinArr[i].name].relatedTo.foreignKey +
+          relationObj[name].relatedTo.foreignKey +
           " = " +
           parentTable +
           "." +
-          relationObj[joinArr[i].name].relatedTo.localKey;
+          relationObj[name].relatedTo.localKey;
       }
-      if (!!relationObj && relationObj[joinArr[i].name].type === "hasOne") {
+      if (!!relationObj && relationObj[name].type === "hasOne") {
         sqlJoin =
           sqlJoin +
           " " +
-          (joinArr[i].joinType === "leftJoin"
+          (joinType === "leftJoin"
             ? "LEFT JOIN"
-            : joinArr[i].joinType === "rightJoin"
+            : joinType === "rightJoin"
             ? "RIGHT JOIN"
             : "JOIN") +
           " " +
-          relationObj[joinArr[i].name].relatedTo.table +
+          relationObj[name].relatedTo.table +
+          " AS " +
+          aliasTable +
           " ON " +
-          relationObj[joinArr[i].name].relatedTo.table +
+          aliasTable +
           "." +
-          relationObj[joinArr[i].name].relatedTo.foreignKey +
+          relationObj[name].relatedTo.foreignKey +
           " = " +
           parentTable +
           "." +
-          relationObj[joinArr[i].name].relatedTo.localKey;
+          relationObj[name].relatedTo.localKey;
+      }
+
+      if (!!joinArr[i].join) {
+        sqlJoin =
+          sqlJoin +
+          " " +
+          this.joinSqlQuery(
+            joinArr[i].join as IJoin[],
+            relationObj?.[name].relatedTo.relations ?? null,
+            aliasTable
+          );
       }
     }
 
@@ -285,17 +305,17 @@ class Model {
   }
 
   joinColumnSqlQuery(joinArr: IJoin[], relationObj: IRelation | null): string {
-    let sqlJoin: any[] = [];
+    let sqlJoin="";
 
     for (let i = 0; i < joinArr.length; i++) {
       const name = joinArr[i].name;
       const joinType = joinArr[i].joinType;
+      const aliasTable = joinType + "_" + name;
       if (!!relationObj && !!relationObj[name].relatedTo.columns) {
         for (let j = 0; j < relationObj[name].relatedTo.columns.length; j++) {
           if (relationObj[name].relatedTo.columns[j].length === 1) {
-            sqlJoin = [
-              ...sqlJoin,
-              relationObj[name].relatedTo.table +
+            sqlJoin = sqlJoin +
+              aliasTable +
                 "." +
                 relationObj[name].relatedTo.columns[j][0] +
                 " AS " +
@@ -303,13 +323,12 @@ class Model {
                 "_" +
                 name +
                 "_" +
-                relationObj[name].relatedTo.columns[j][0],
-            ];
+                relationObj[name].relatedTo.columns[j][0] + (i!==(joinArr.length-1)?", ":j!==relationObj[name].relatedTo.columns.length-1?", ":"")
+            ;
           }
           if (relationObj[name].relatedTo.columns[j].length === 2) {
-            sqlJoin = [
-              ...sqlJoin,
-              relationObj[name].relatedTo.table +
+            sqlJoin = sqlJoin +
+              aliasTable +
                 "." +
                 relationObj[name].relatedTo.columns[j][0] +
                 " AS " +
@@ -317,16 +336,22 @@ class Model {
                 "_" +
                 name +
                 "_" +
-                relationObj[name].relatedTo.columns[j][1],
-            ];
+                relationObj[name].relatedTo.columns[j][1] + (i!==(joinArr.length-1)?", ":j!==relationObj[name].relatedTo.columns.length-1?", ":"");
           }
         }
       }
+      if (!!joinArr[i].join) {
+        sqlJoin =
+          sqlJoin +
+          this.joinColumnSqlQuery(
+            joinArr[i].join as IJoin[],
+            relationObj?.[name].relatedTo.relations ?? null,
+            // aliasTable
+          );
+      }
     }
 
-    const query = (sqlJoin.length > 0 ? " , " : "") + sqlJoin.join(" , ");
-
-    return query;
+    return sqlJoin!==""?", "+sqlJoin:"";
   }
 
   joinFilterSqlQuery(
@@ -337,12 +362,15 @@ class Model {
     let filterQuery: string[] = [];
 
     for (let i = 0; i < joinArr.length; i++) {
+      const name = joinArr[i].name;
+      const joinType = joinArr[i].joinType;
+      const aliasTable = joinType + "_" + name;
       if (!!relationObj) {
         filterQuery = [
           ...filterQuery,
           ...this.filterQuery(
             joinArr[i].filter ?? [],
-            relationObj[joinArr[i].name].relatedTo.table
+            aliasTable
           ),
         ];
       }
@@ -484,6 +512,7 @@ class Model {
           joinSql,
           !!alternativeRelations ? alternativeRelations : this.relations
         );
+        // selectJoinQuery = (selectJoinQuery!==""?",":"") + selectJoinQuery;
         const filterJoinQuery = this.joinFilterSqlQuery(
           combineJoinSql as IJoin[],
           !!alternativeRelations ? alternativeRelations : this.relations

@@ -24,6 +24,7 @@ const TemplateDashboard: React.FC<{ children: React.ReactNode }> = ({ children }
                                             <li><Link to="/dashboard/blog/content">Contents</Link></li>
                                             <li><Link to="/dashboard/blog/category">Categories</Link></li>
                                             <li><Link to="/dashboard/blog/tag">Tags</Link></li>
+                                            <li><Link to="/dashboard/blog/comment">Comment</Link></li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -60,6 +61,16 @@ const TemplateDashboard: React.FC<{ children: React.ReactNode }> = ({ children }
             </div>
 
         </>
+
+        
+      <footer className="footer">
+        <div className="content has-text-centered">
+          <p>
+            <strong>Webivert</strong> by{" "}
+            <a href="https://jgthms.com">Yusuf Basori</a>.
+          </p>
+        </div>
+      </footer>
 
     </>
 }

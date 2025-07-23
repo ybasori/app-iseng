@@ -13,6 +13,7 @@ import CategoryCreateEdit from '@src/pages/Dashboard/pages/Blog/pages/Category/p
 import Tag from '@src/pages/Dashboard/pages/Blog/pages/Tag/Tag';
 import TagCreateEdit from '@src/pages/Dashboard/pages/Blog/pages/Tag/page/TagCreateEdit';
 import PublicBlogContent from '@src/pages/Blog/pages/Content/PublicBlogContent';
+import Comment from '@src/pages/Dashboard/pages/Blog/pages/Comment/Comment';
 
 export interface IRoute{name: string; Template?: any; component: React.ReactNode; isProtected?:boolean}
 
@@ -76,6 +77,12 @@ export const router:{[path:string]:{name: string; Template?: any; component: Rea
     Template: TemplateDashboard,
     component: <Tag />
   },
+  "/dashboard/blog/comment": {
+    name: "Comment",
+    isProtected: true,
+    Template: TemplateDashboard,
+    component: <Comment />
+  },
   "/dashboard/blog": {
     name: "Blog",
     isProtected: true,
@@ -124,4 +131,6 @@ export const api = {
   DASHBOARD_BLOG_TAG_CREATE: "/api/dashboard/blog/tag/create",
   DASHBOARD_BLOG_TAG_UPDATE: "/api/dashboard/blog/tag/update",
   DASHBOARD_BLOG_TAG_DELETE: "/api/dashboard/blog/tag/delete",
+  DASHBOARD_BLOG_COMMENT_LIST: "/api/dashboard/blog/comment",
+  DASHBOARD_BLOG_COMMENT_DELETE: "/api/dashboard/blog/comment/delete",
 }
