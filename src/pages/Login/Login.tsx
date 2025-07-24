@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { notify } from "@src/_states/reducers/notif/notif.thunk";
-import { navigate } from "@src/helper/helper";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@src/_states/store";
 import { login } from "@src/_states/reducers/auth/auth.slice";
+import { useHistory } from "react-router-dom";
 
 const Login = () => {
     // const {auth} = useSelector();
+    const history = useHistory();
     const dispatch = useDispatch<AppDispatch>();
     const [form, setForm] = useState({
         username:"",
@@ -30,7 +31,7 @@ const Login = () => {
                     dispatch(notify({title:"", text:data.message, timer:5000}))
                 if(data.statusCode === 200){
                     dispatch(login(data.result));
-                    navigate("/");
+                    history.push("/")
 
                 }
               })

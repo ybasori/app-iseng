@@ -7,7 +7,6 @@ import {
   fetchBlogContent,
 } from "@src/_states/reducers/blogContent/blogContent.thunk";
 import { notify } from "@src/_states/reducers/notif/notif.thunk";
-import Link from "@src/components/atoms/Link/Link";
 import Modal from "@src/components/atoms/Modal/Modal";
 import Table from "@src/components/atoms/Table/Table";
 import { api } from "../../../../../../_config/config";
@@ -15,6 +14,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@src/_states/store";
 import { RootState } from "@src/_states/types";
+import { NavLink } from "react-router-dom";
 
 const Content = () => {
   const [oneTime, setOneTime] = useState(true);
@@ -132,12 +132,12 @@ const Content = () => {
         >
           Reload
         </button>
-        <Link
-          className="button is-success is-small"
+        <NavLink
+          className={()=>"button is-success is-small"}
           to="/dashboard/blog/content/create"
         >
           Add
-        </Link>
+        </NavLink>
         {dataChecked.length > 0 ? (
           <button
             className="button is-danger is-small"
@@ -223,12 +223,12 @@ const Content = () => {
             render: (_cell, row) => {
               return (
                 <>
-                  <Link
-                    className="button is-info is-small"
+                  <NavLink
+                    className={()=>"button is-info is-small"}
                     to={`/dashboard/blog/content/edit/${row.uid}`}
                   >
                     Edit
-                  </Link>
+                  </NavLink>
                 </>
               );
             },

@@ -1,10 +1,10 @@
 import { useState } from "react";
-import Link from "../../atoms/Link/Link";
 import { navigate } from "@src/helper/helper";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@src/_states/store";
 import { RootState } from "@src/_states/types";
 import { logout } from "@src/_states/reducers/auth/auth.slice";
+import { NavLink } from "react-router-dom";
 
 const Navbar = () => {
     const auth = useSelector((state:RootState)=>state.auth);
@@ -34,14 +34,14 @@ const Navbar = () => {
                 console.error('Error:', error);
             });
     }
-    return (<><nav className="navbar" role="navigation" aria-label="main navigation">
+    return (<><nav className="navbar" role="navigation" aria-label="main navigation" style={{position: "fixed", width: "100%"}}>
         <div className="navbar-brand">
-            <Link className="navbar-item" to="/">
+            <NavLink className={()=>"navbar-item"} to="/">
                 <svg height="160" width="640" xmlns="http://www.w3.org/2000/svg">
-                    <text x="5" y="20" fill="pink" stroke="blue" font-size="25">Webivert</text>
+                    <text x="5" y="20" fill="pink" stroke="blue" fontSize="25">Webivert</text>
                 </svg>
 
-            </Link>
+            </NavLink>
 
             <a role="button" className={`navbar-burger ${openMenu ? "is-active" : ""}`} aria-label="menu" aria-expanded="false" data-target="navbarBasicExample" onClick={(e) => { e.preventDefault(); setOpenMenu(!openMenu) }}>
                 <span aria-hidden="true"></span>
@@ -53,20 +53,21 @@ const Navbar = () => {
 
         <div id="navbarBasicExample" className={`navbar-menu ${openMenu ? "is-active" : ""}`}>
             <div className="navbar-start">
-                <Link to="/" className="navbar-item">Home</Link>
-                <Link to="/about" className="navbar-item">About</Link>
+                <NavLink to="/" className={()=>"navbar-item"}>Home</NavLink>
+                <NavLink to="/blog" className={()=>"navbar-item"}>Blog</NavLink>
+                <NavLink to="/about" className={()=>"navbar-item"}>About</NavLink>
             </div>
 
             <div className="navbar-end">
                 {!!auth.userData ? <>
-                    <Link to="/dashboard" className="navbar-item">Dashboard</Link>
+                    <NavLink to="/dashboard" className={()=>"navbar-item"}>Dashboard</NavLink>
                     <div className="navbar-item">
                         <button className="button is-light" type="button" onClick={onLogout} disabled={isLogoutLoading}>
                             Log out {isLogoutLoading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : null}
                         </button>
                     </div>
                 </> :
-                    <div className="navbar-item"><Link className="button is-light" to="/login">Log in</Link></div>}
+                    <div className="navbar-item"><NavLink className={()=>"button is-light"} to="/login">Log in</NavLink></div>}
 
             </div>
         </div>

@@ -3,7 +3,6 @@ import {
   setPage,
   setSort,
 } from "@src/_states/reducers/blogCategory/blogCategory.slice";
-import Link from "@src/components/atoms/Link/Link";
 import Modal from "@src/components/atoms/Modal/Modal";
 import Table from "@src/components/atoms/Table/Table";
 import { api } from "../../../../../../_config/config";
@@ -13,6 +12,7 @@ import { AppDispatch } from "@src/_states/store";
 import { RootState } from "@src/_states/types";
 import { notify } from "@src/_states/reducers/notif/notif.thunk";
 import { fetchBlogCategory } from "@src/_states/reducers/blogCategory/blogCategory.thunk";
+import { NavLink } from "react-router-dom";
 
 const Category = () => {
   const [oneTime, setOneTime] = useState(true);
@@ -120,12 +120,12 @@ const Category = () => {
         >
           Reload
         </button>
-        <Link
-          className="button is-success is-small"
+        <NavLink
+          className={()=>"button is-success is-small"}
           to="/dashboard/blog/category/create"
         >
           Add
-        </Link>
+        </NavLink>
         {dataChecked.length > 0 ? (
           <button
             className="button is-danger is-small"
@@ -184,12 +184,12 @@ const Category = () => {
             render: (_cell, row) => {
               return (
                 <>
-                  <Link
-                    className="button is-info is-small"
+                  <NavLink
+                    className={()=>"button is-info is-small"}
                     to={`/dashboard/blog/category/edit/${row.uid}`}
                   >
                     Edit
-                  </Link>
+                  </NavLink>
                 </>
               );
             },

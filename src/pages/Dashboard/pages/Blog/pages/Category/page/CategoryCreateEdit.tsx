@@ -13,11 +13,12 @@ import { api } from "../../../../../../../_config/config";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@src/_states/store";
 import { RootState } from "@src/_states/types";
+import { useParams } from "react-router-dom";
 
 const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
+  const {uid} = useParams<{uid:string}>()
   const [oneTime, setOneTime] = useState(isEdit);
   const blogCategory = useSelector((state:RootState)=>(state.blogCategory));
-  const route = useSelector((state:RootState)=>(state.route));
   const dispatch = useDispatch<AppDispatch>();
 
   const validation = () => {
@@ -44,7 +45,7 @@ const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
 
   const onInitialValue = useCallback(() => {
     fetch(
-      `${api.DASHBOARD_BLOG_CATEGORY_LIST}?filter[uid]=${route.params.uid}&show[]=uid&show[]=name`,
+      `${api.DASHBOARD_BLOG_CATEGORY_LIST}?filter[uid]=${uid}&show[]=uid&show[]=name`,
       {
         method: "GET",
         headers: {
@@ -66,13 +67,13 @@ const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
           notify({ title: "", text: "Something went wrong!", timer: 5000 })
         );
       });
-  }, [dispatch, route.params.uid, setDefaultForm]);
+  }, [dispatch, uid, setDefaultForm]);
 
   const onSubmit: ICallbackSubmit = (values, { setSubmitting }) => {
     fetch(
       `${
         isEdit
-          ? `${api.DASHBOARD_BLOG_CATEGORY_UPDATE}/${route.params.uid}`
+          ? `${api.DASHBOARD_BLOG_CATEGORY_UPDATE}/${uid}`
           : `${api.DASHBOARD_BLOG_CATEGORY_CREATE}`
       }`,
       {
@@ -126,7 +127,7 @@ const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
       setOneTime(false);
       onInitialValue();
     }
-  }, [onInitialValue, oneTime, route.params]);
+  }, [onInitialValue, oneTime]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

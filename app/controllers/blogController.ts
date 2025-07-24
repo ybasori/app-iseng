@@ -82,6 +82,53 @@ const blogController = {
       });
     }
   },
+  deleteComment: async (req: Request, res: Response) => {
+    try {
+      const token = req.cookies.token;
+
+      const decoded: any = await promisify(jwt.verify)(
+        token,
+        process.env.SECRET_KEY ?? ""
+      );
+      const blogContentModel = new BlogComment();
+      await blogContentModel.update(
+        {
+          deleted_at: new Date()
+            .toISOString()
+            .replace("T", " ")
+            .replace("Z", "")
+            .slice(0, 19),
+        },
+        {
+          join: [
+            {
+              name: "content",
+              joinType: "leftJoin",
+              join: [
+                {
+                  name: "author",
+                  joinType: "leftJoin",
+                },
+              ],
+            },
+          ],
+          filter: {
+            "blog_comments.uid": req.params.uid,
+            "leftJoin_author.id": decoded.id,
+          },
+        }
+      );
+      return res.status(200).json({
+        statusCode: 200,
+        message: "Success!",
+      });
+    } catch (err) {
+      return res.status(500).json({
+        statusCode: 500,
+        message: err,
+      });
+    }
+  },
   listCommentPublic: async (req: Request, res: Response) => {
     try {
       let filter = {};
@@ -265,8 +312,75 @@ const blogController = {
         pagination,
         join: [
           { name: "content_tag", join: ["tag"] },
-          { name: "category", show: ["name"] },
+          { name: "category", show: ["name"], joinType:"leftJoin" },
           { name: "created_by", show: ["name"] },
+        ],
+        show,
+      });
+      const [[blogContentTotal]] = await blogContentModel.countByFilter({
+        filter: {
+          deleted_at: "null",
+          ...filter,
+        },
+        join: [
+          { name: "content_tag", join: ["tag"] },
+          { name: "category", show: ["name"], joinType:"leftJoin" },
+          { name: "created_by", show: ["name"] },
+        ],
+      });
+      return res.status(200).json({
+        statusCode: 200,
+        message: "Success!",
+        result: {
+          data: blogContents,
+          total: blogContentTotal.total,
+        },
+      });
+    } catch (err: any) {
+      console.log(err);
+      return res.status(500).json({
+        statusCode: 500,
+        message: err.message,
+      });
+    }
+  },
+  listCategoryPublic: async (req: Request, res: Response) => {
+    try {
+      let filter = {};
+      let pagination = {};
+      let show: any[] = [];
+      const query = convertToObj(req.query);
+
+      if (!!query.page) {
+        pagination = { ...pagination, page: query.page };
+      }
+
+      if (!!query.sort) {
+        pagination = { ...pagination, sort: query.sort };
+      }
+      if (!!query.filter) {
+        filter = { ...filter, ...(query.filter as any) };
+      }
+      if (!!query.show) {
+        show = [...show, ...(query.show as any)];
+      }
+      const blogContentModel = new BlogCategory();
+      const blogContents = await blogContentModel.getByFilter({
+        filter: {
+          deleted_at: "null",
+          ...filter,
+        },
+        pagination,
+        join: [
+          {
+            name: "content",
+            pagination: {
+              page: {
+                of: 1,
+                size: 1,
+              },
+            },
+          },
         ],
         show,
       });
@@ -508,8 +622,10 @@ const blogController = {
           ...optionalInputWithRelation,
         },
         {
-          created_by_user_id: decoded.id,
-          uid: req.params.uid,
+          filter: {
+            created_by_user_id: decoded.id,
+            uid: req.params.uid,
+          },
         }
       );
       const [blogContent] = await blogContentModel.getByFilter({
@@ -569,8 +685,10 @@ const blogController = {
             .slice(0, 19),
         },
         {
-          uid: req.params.uid,
-          created_by_user_id: decoded.id,
+          filter: {
+            uid: req.params.uid,
+            created_by_user_id: decoded.id,
+          },
         }
       );
       return res.status(200).json({
@@ -724,8 +842,10 @@ const blogController = {
           name: req.body.name,
         },
         {
-          created_by_user_id: decoded.id,
-          uid: req.params.uid,
+          filter: {
+            created_by_user_id: decoded.id,
+            uid: req.params.uid,
+          },
         }
       );
       const [blogContent] = await blogContentModel.getByFilter({
@@ -761,8 +881,10 @@ const blogController = {
             .slice(0, 19),
         },
         {
-          uid: req.params.uid,
-          created_by_user_id: decoded.id,
+          filter: {
+            uid: req.params.uid,
+            created_by_user_id: decoded.id,
+          },
         }
       );
       return res.status(200).json({
@@ -916,8 +1038,10 @@ const blogController = {
           name: req.body.name,
         },
         {
-          created_by_user_id: decoded.id,
-          uid: req.params.uid,
+          filter: {
+            created_by_user_id: decoded.id,
+            uid: req.params.uid,
+          },
         }
       );
       const [blogContent] = await blogContentModel.getByFilter({
@@ -953,8 +1077,10 @@ const blogController = {
             .slice(0, 19),
         },
         {
-          uid: req.params.uid,
-          created_by_user_id: decoded.id,
+          filter: {
+            uid: req.params.uid,
+            created_by_user_id: decoded.id,
+          },
         }
       );
       return res.status(200).json({

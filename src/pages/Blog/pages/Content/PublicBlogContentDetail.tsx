@@ -9,21 +9,21 @@ import {
 import { AppDispatch } from "@src/_states/store";
 import { RootState } from "@src/_states/types";
 import FacebookComment from "@src/components/atoms/FacebookComment/FacebookComment";
-import Link from "@src/components/atoms/Link/Link";
 import useForm, { ICallbackSubmit } from "@src/hooks/useForm";
 // import useWindowWidth from "@src/hooks/useWindowWidth";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { NavLink, useParams } from "react-router-dom";
 import * as yup from "yup";
 
-const PublicBlogContent = () => {
+const PublicBlogContentDetail = () => {
   const [oneTime, setOneTime] = useState(true);
   const [loadContent, setLoadContent] = useState(false);
   const [loadComment, setLoadComment] = useState(false);
   const [commentList, setCommentList] = useState<any[]>([]);
   const [totalComment, setTotalComment] = useState<number>(0);
   const publicBlogContentDetail = useSelector((state:RootState)=>(state.publicBlogContentDetail));
-  const route = useSelector((state:RootState)=>(state.route));
+  const {uid} = useParams<{uid: string}>()
 
   const [page, setPage] = useState({
     of: 1,
@@ -64,7 +64,7 @@ const PublicBlogContent = () => {
 
   const onGetComment = useCallback(() => {
     fetch(
-      `${api.PUBLIC_BLOG_COMMENT_LIST}?show[]=uid&show[]=name&show[]=comment&filter[leftJoin_content_uid]=${route.params.uid}&sort[0][by]=created_at&sort[0][order]=desc&page[of]=${page.of}&page[size]=${page.size}`,
+      `${api.PUBLIC_BLOG_COMMENT_LIST}?show[]=uid&show[]=name&show[]=comment&filter[leftJoin_content_uid]=${uid}&sort[0][by]=created_at&sort[0][order]=desc&page[of]=${page.of}&page[size]=${page.size}`,
       {
         method: "GET",
         headers: {
@@ -82,7 +82,7 @@ const PublicBlogContent = () => {
       .catch(() => {
         dispatch(notify({title:"", text:"Something went wrong!", timer:5000}));
       });
-  }, [dispatch, page.of, page.size, route.params.uid]);
+  }, [dispatch, page.of, page.size, uid]);
 
   const onSubmit: ICallbackSubmit = (values, { setSubmitting }) => {
     fetch(`${api.PUBLIC_BLOG_COMMENT_STORE}`, {
@@ -92,7 +92,7 @@ const PublicBlogContent = () => {
       },
       body: JSON.stringify({
         ...values,
-        content_uid: route.params.uid,
+        content_uid: uid,
       }),
     })
       .then((res) => {
@@ -115,12 +115,12 @@ const PublicBlogContent = () => {
       setOneTime(false);
       dispatch(
         setFilter({
-          uid: route.params.uid,
+          uid: uid,
         })
       );
       setLoadContent(true);
     }
-  }, [publicBlogContentDetail.response, oneTime, dispatch, route.params.uid]);
+  }, [publicBlogContentDetail.response, oneTime, dispatch, uid]);
 
   useEffect(() => {
     if (loadContent) {
@@ -161,10 +161,7 @@ const PublicBlogContent = () => {
   ]);
   return (
     <>
-      <section className="section">
-        <div className="container">
-          <div className="columns">
-            <div className="column">
+            <>
               {publicBlogContentDetail.loading ? (
                 "Loading..."
               ) : (
@@ -179,9 +176,9 @@ const PublicBlogContent = () => {
                     ) => (
                       <React.Fragment key={key}>
                         <h1 className="title">
-                          <Link to={`/blog/content/${item.uid}`}>
+                          <NavLink to={`/blog/content/${item.uid}`}>
                             {item.title}
-                          </Link>
+                          </NavLink>
                         </h1>
                         <p className="subtitle">
                           My first website with <strong>Bulma</strong>!
@@ -421,19 +418,16 @@ const PublicBlogContent = () => {
 
                         {/* <FacebookComment url="https://developers.facebook.com/docs/plugins/comments#configurator" width={(Math.floor(width-(width*(24/100)))).toString()} /> */}
                         <FacebookComment
-                          url={`https://localhost:3000/blog/content/${route.params.uid}`}
+                          url={`https://localhost:3000/blog/content/${uid}`}
                         />
                       </React.Fragment>
                     )
                   )}
                 </>
               )}
-            </div>
-          </div>
-        </div>
-      </section>
+            </>
     </>
   );
 };
 
-export default PublicBlogContent;
+export default PublicBlogContentDetail;

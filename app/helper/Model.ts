@@ -305,7 +305,7 @@ class Model {
   }
 
   joinColumnSqlQuery(joinArr: IJoin[], relationObj: IRelation | null): string {
-    let sqlJoin="";
+    let sqlJoin = "";
 
     for (let i = 0; i < joinArr.length; i++) {
       const name = joinArr[i].name;
@@ -314,29 +314,40 @@ class Model {
       if (!!relationObj && !!relationObj[name].relatedTo.columns) {
         for (let j = 0; j < relationObj[name].relatedTo.columns.length; j++) {
           if (relationObj[name].relatedTo.columns[j].length === 1) {
-            sqlJoin = sqlJoin +
+            sqlJoin =
+              sqlJoin +
               aliasTable +
-                "." +
-                relationObj[name].relatedTo.columns[j][0] +
-                " AS " +
-                joinType +
-                "_" +
-                name +
-                "_" +
-                relationObj[name].relatedTo.columns[j][0] + (i!==(joinArr.length-1)?", ":j!==relationObj[name].relatedTo.columns.length-1?", ":"")
-            ;
+              "." +
+              relationObj[name].relatedTo.columns[j][0] +
+              " AS " +
+              joinType +
+              "_" +
+              name +
+              "_" +
+              relationObj[name].relatedTo.columns[j][0] +
+              (i !== joinArr.length - 1
+                ? ", "
+                : j !== relationObj[name].relatedTo.columns.length - 1
+                ? ", "
+                : "");
           }
           if (relationObj[name].relatedTo.columns[j].length === 2) {
-            sqlJoin = sqlJoin +
+            sqlJoin =
+              sqlJoin +
               aliasTable +
-                "." +
-                relationObj[name].relatedTo.columns[j][0] +
-                " AS " +
-                joinType +
-                "_" +
-                name +
-                "_" +
-                relationObj[name].relatedTo.columns[j][1] + (i!==(joinArr.length-1)?", ":j!==relationObj[name].relatedTo.columns.length-1?", ":"");
+              "." +
+              relationObj[name].relatedTo.columns[j][0] +
+              " AS " +
+              joinType +
+              "_" +
+              name +
+              "_" +
+              relationObj[name].relatedTo.columns[j][1] +
+              (i !== joinArr.length - 1
+                ? ", "
+                : j !== relationObj[name].relatedTo.columns.length - 1
+                ? ", "
+                : "");
           }
         }
       }
@@ -345,13 +356,13 @@ class Model {
           sqlJoin +
           this.joinColumnSqlQuery(
             joinArr[i].join as IJoin[],
-            relationObj?.[name].relatedTo.relations ?? null,
+            relationObj?.[name].relatedTo.relations ?? null
             // aliasTable
           );
       }
     }
 
-    return sqlJoin!==""?", "+sqlJoin:"";
+    return sqlJoin !== "" ? ", " + sqlJoin : "";
   }
 
   joinFilterSqlQuery(
@@ -368,10 +379,7 @@ class Model {
       if (!!relationObj) {
         filterQuery = [
           ...filterQuery,
-          ...this.filterQuery(
-            joinArr[i].filter ?? [],
-            aliasTable
-          ),
+          ...this.filterQuery(joinArr[i].filter ?? [], aliasTable),
         ];
       }
     }
@@ -962,25 +970,48 @@ class Model {
     return db.query(query);
   }
 
-  update(payload: any, filter: any) {
+  update(
+    payload: any,
+    {
+      filter,
+      join = [],
+      table: alternativeTable,
+      relations: alternativeRelations = null,
+    }: { filter: any; join?: IJoin[]; relations?: IRelation | null; table?: string }
+  ) {
     const dbi = this.database ?? "";
     const db = dbs[dbi as keyof typeof dbs];
+    
+    const joinSql = join.filter(
+      (item) =>
+        typeof item !== "string" &&
+        (item.joinType === "rightJoin" ||
+          item.joinType === "leftJoin" ||
+          item.joinType === "join")
+    ) as unknown as IJoin[];
+
+    const joinQuery = this.joinSqlQuery(
+      joinSql,
+      !!alternativeRelations ? alternativeRelations : this.relations,
+      !!alternativeTable ? alternativeTable : this.table ?? ""
+    );
 
     const set = [
       ...Object.keys(payload).map((key) =>
-        payload[key] === null ? `${key}= NULL ` : `${key}='${payload[key]}'`
+        payload[key] === null ? `${!!alternativeTable ? alternativeTable : this.table ?? ""}.${key}= NULL ` : `${!!alternativeTable ? alternativeTable : this.table ?? ""}.${key}='${payload[key]}'`
       ),
-      `updated_at = '${new Date()
+      `${!!alternativeTable ? alternativeTable : this.table ?? ""}.updated_at = '${new Date()
         .toISOString()
         .replace("T", " ")
         .replace("Z", "")
         .slice(0, 19)}'`,
     ].join(" , ");
+
     const where = [
       ...Object.keys(filter).map((key) => `${key}='${filter[key]}'`),
     ].join(" AND ");
 
-    const query = `UPDATE ${this.table} SET ${set} WHERE ${where}`;
+    const query = `UPDATE ${this.table} ${joinQuery} SET ${set} WHERE ${where}`;
     const timestamp = new Date().toISOString();
     console.log(`[${timestamp}]\x1b[38;2;255;165;0m[SQL]\x1b[0m ${query}`);
     console.log(``);

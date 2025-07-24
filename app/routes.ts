@@ -107,11 +107,11 @@ const routes: IRoute[] = [
                     method: "get",
                     controller: blogController.listComment,
                   },
-                  // {
-                  //   path: "/delete/:uid",
-                  //   method: "delete",
-                  //   controller: blogController.deleteComment,
-                  // },
+                  {
+                    path: "/delete/:uid",
+                    method: "delete",
+                    controller: blogController.deleteComment,
+                  },
                 ],
               },
             ],
@@ -125,6 +125,11 @@ const routes: IRoute[] = [
                 path: "/content",
                 method: "get",
                 controller: blogController.listContentPublic,
+            },
+            {
+                path: "/category",
+                method: "get",
+                controller: blogController.listCategoryPublic,
             },
             {
                 path: "/comment",

@@ -1,15 +1,30 @@
-import { RootState } from "@src/_states/types";
-import Link from "@src/components/atoms/Link/Link";
-import { useSelector } from "react-redux";
+import Navbar from "@src/components/molecules/Navbar/Navbar";
 
 function About() {
-  const auth = useSelector((state:RootState)=>(state.auth));
+  
   return (
+    
     <>
-      About
-            <Link to="/">go to home <i className="fa-solid fa-circle-notch fa-spin"></i></Link>
+      <Navbar />
 
-            {JSON.stringify(auth)}
+      <section className="section">
+        <div className="container pt-5">
+          <div className="columns">
+            <div className="column">
+              About
+            </div>
+
+          </div>
+        </div>
+      </section>
+      <footer className="footer">
+        <div className="content has-text-centered">
+          <p>
+            <strong>Webivert</strong> by{" "}
+            <a href="https://jgthms.com">Yusuf Basori</a>.
+          </p>
+        </div>
+      </footer>
     </>
   )
 }

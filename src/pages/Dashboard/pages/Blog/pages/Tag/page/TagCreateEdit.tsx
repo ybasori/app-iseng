@@ -15,11 +15,12 @@ import { api } from "../../../../../../../_config/config";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@src/_states/store";
 import { RootState } from "@src/_states/types";
+import { useParams } from "react-router-dom";
 
 const TagCreateEdit: React.FC<ITagCreateEdit> = ({ isEdit }) => {
   const [oneTime, setOneTime] = useState(isEdit);
   const blogTag = useSelector((state:RootState)=>(state.blogTag));
-  const route = useSelector((state:RootState)=>(state.route));
+  const {uid} = useParams<{uid:string}>()
   const dispatch = useDispatch<AppDispatch>();
 
   const validation = () => {
@@ -46,7 +47,7 @@ const TagCreateEdit: React.FC<ITagCreateEdit> = ({ isEdit }) => {
 
   const onInitialValue = useCallback(() => {
     fetch(
-      `${api.DASHBOARD_BLOG_TAG_LIST}?filter[uid]=${route.params.uid}&show[]=uid&show[]=name`,
+      `${api.DASHBOARD_BLOG_TAG_LIST}?filter[uid]=${uid}&show[]=uid&show[]=name`,
       {
         method: "GET",
         headers: {
@@ -66,11 +67,11 @@ const TagCreateEdit: React.FC<ITagCreateEdit> = ({ isEdit }) => {
       .catch(() => {
         dispatch(notify({title:"", text:"Something went wrong!", timer:5000}));
       });
-  }, [dispatch, route.params.uid, setDefaultForm]);
+  }, [dispatch, uid, setDefaultForm]);
 
   const onSubmit: ICallbackSubmit = (values, { setSubmitting }) => {
     fetch(
-      `${isEdit ? `${api.DASHBOARD_BLOG_TAG_UPDATE}/${route.params.uid}` : `${api.DASHBOARD_BLOG_TAG_CREATE}`}`,
+      `${isEdit ? `${api.DASHBOARD_BLOG_TAG_UPDATE}/${uid}` : `${api.DASHBOARD_BLOG_TAG_CREATE}`}`,
       {
         method: `${isEdit ? "PUT" : "POST"}`,
         headers: {

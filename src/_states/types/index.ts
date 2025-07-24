@@ -4,9 +4,9 @@ import { IBlogCommentState } from "../reducers/blogComment/blogComment.type";
 import { IBlogContentState } from "../reducers/blogContent/blogContent.type";
 import { IBlogTagState } from "../reducers/blogTag/blogTag.type";
 import { NotifState } from "../reducers/notif/notif.type";
+import { IPublicBlogCategoryState } from "../reducers/publicBlogCategory/publicBlogCategory.type";
 import { IPublicBlogContentState } from "../reducers/publicBlogContent/publicBlogContent.type";
 import { IPublicBlogContentDetailState } from "../reducers/publicBlogContentDetail/publicBlogContentDetail.type";
-import { RouteState } from "../reducers/route/route.type";
 
 export interface IAction {
     type?:string;payload?:any
@@ -32,6 +32,6 @@ export interface RootState {
   notif: NotifState;
   publicBlogContent: IPublicBlogContentState;
   publicBlogContentDetail: IPublicBlogContentDetailState;
-  route: RouteState;
+  publicBlogCategory: IPublicBlogCategoryState;
 }
   

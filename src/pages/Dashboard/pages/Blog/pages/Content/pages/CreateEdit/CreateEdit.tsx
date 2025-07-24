@@ -15,13 +15,14 @@ import { api } from "../../../../../../../../_config/config";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@src/_states/store";
 import { RootState } from "@src/_states/types";
+import { useParams } from "react-router-dom";
 
 const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
   const [oneTime, setOneTime] = useState(true);
   const [categories, setCategories] = useState<any[]>([]);
   const [tags, setTags] = useState<any[]>([]);
   const blogContent = useSelector((state:RootState)=>(state.blogContent));
-  const route = useSelector((state:RootState)=>(state.route));
+  const {uid} = useParams<{uid: string}>();
   const dispatch = useDispatch<AppDispatch>();
 
   const validation = () => {
@@ -87,7 +88,7 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
 
   const onInitialValue = useCallback(() => {
     fetch(
-      `${api.DASHBOARD_BLOG_CONTENT_LIST}?filter[uid]=${route.params.uid}&show[]=uid&show[]=title&show[]=content&show[]=leftJoin_category_uid`,
+      `${api.DASHBOARD_BLOG_CONTENT_LIST}?filter[uid]=${uid}&show[]=uid&show[]=title&show[]=content&show[]=leftJoin_category_uid`,
       {
         method: "GET",
         headers: {
@@ -111,11 +112,11 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
       .catch(() => {
         dispatch(notify({title:"", text:"Something went wrong!", timer:5000}));
       });
-  }, [dispatch, route.params.uid, setDefaultForm]);
+  }, [dispatch, uid, setDefaultForm]);
 
   const onSubmit: ICallbackSubmit = (values, { setSubmitting }) => {
     fetch(
-      `${isEdit ? `${api.DASHBOARD_BLOG_CONTENT_UPDATE}/${route.params.uid}` : `${api.DASHBOARD_BLOG_CONTENT_CREATE}`}`,
+      `${isEdit ? `${api.DASHBOARD_BLOG_CONTENT_UPDATE}/${uid}` : `${api.DASHBOARD_BLOG_CONTENT_CREATE}`}`,
       {
         method: `${isEdit ? "PUT" : "POST"}`,
         headers: {
@@ -182,7 +183,7 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
       onGetCategory();
       onGetTag();
     }
-  }, [onInitialValue, oneTime, route.params, isEdit, onGetCategory, onGetTag]);
+  }, [onInitialValue, oneTime, isEdit, onGetCategory, onGetTag]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

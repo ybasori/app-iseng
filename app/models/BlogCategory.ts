@@ -13,6 +13,15 @@ class BlogCategory extends Model{
                 localKey: "id"
             }
         },
+        content: {
+            type: "hasMany",
+            relatedTo: {
+                database: "webivert_app",
+                table: "blog_contents",
+                foreignKey: "blog_category_id",
+                localKey: "id"
+            }
+        },
     }
 }
 

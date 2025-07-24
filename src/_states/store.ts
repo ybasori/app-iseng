@@ -7,7 +7,7 @@ import blogTag from "./reducers/blogTag/blogTag.slice";
 import notif from "./reducers/notif/notif.slice";
 import publicBlogContent from "./reducers/publicBlogContent/publicBlogContent.slice";
 import publicBlogContentDetail from "./reducers/publicBlogContentDetail/publicBlogContentDetail.slice";
-import route from "./reducers/route/route.slice";
+import publicBlogCategory from "./reducers/publicBlogCategory/publicBlogCategory.slice";
 import { RootState } from "./types";
 
 const preloadedState = 
@@ -41,7 +41,7 @@ export const store = configureStore({
     notif,
     publicBlogContent,
     publicBlogContentDetail,
-    route,
+    publicBlogCategory,
   },
   preloadedState,
   middleware: (getDefaultMiddleware) =>
