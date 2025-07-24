@@ -4,12 +4,9 @@ import { RootState } from "@src/_states/types";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Navbar from "@src/components/molecules/Navbar/Navbar";
-import { NavLink, Route, Switch, useRouteMatch } from "react-router-dom";
-import PublicBlogMain from "./pages/PublicBlogMain/PublicBlogMain";
-import PublicBlogContentDetail from "./pages/Content/PublicBlogContentDetail";
+import { NavLink } from "react-router-dom";
 
-function PublicBlog() {
-  const match = useRouteMatch();
+const PublicBlog:React.FC<{children?:React.ReactNode}> = ({children}) => {
   const [oneTime, setOneTime] = useState(true);
   const [loadContent, setLoadContent] = useState(false);
 
@@ -55,17 +52,7 @@ function PublicBlog() {
         <div className="container pt-5">
           <div className="columns">
             <div className="column">
-              <Switch>
-                <Route path={`${match.path}/content/:uid`}>
-                  <PublicBlogContentDetail />
-                </Route>
-                <Route path={`${match.path}/category/:uid`}>
-                  <PublicBlogMain />
-                </Route>
-                <Route path={match.path}>
-                  <PublicBlogMain />
-                </Route>
-              </Switch>
+              {children}
             </div>
             <div className="column is-one-third">
               <article className="panel is-primary">

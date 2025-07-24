@@ -2,19 +2,9 @@
 // import { useSelector } from "react-redux";
 
 import Navbar from "@src/components/molecules/Navbar/Navbar";
-import { NavLink, Route, Switch, useRouteMatch } from "react-router-dom";
-import Blog from "./pages/Blog/Blog";
-import Content from "./pages/Blog/pages/Content/Content";
-import Category from "./pages/Blog/pages/Category/Category";
-import Tag from "./pages/Blog/pages/Tag/Tag";
-import Comment from "./pages/Blog/pages/Comment/Comment";
-import CreateEdit from "./pages/Blog/pages/Content/pages/CreateEdit/CreateEdit";
-import CategoryCreateEdit from "./pages/Blog/pages/Category/page/CategoryCreateEdit";
-import TagCreateEdit from "./pages/Blog/pages/Tag/page/TagCreateEdit";
+import { NavLink } from "react-router-dom";
 
-function Dashboard() {
-  const match = useRouteMatch();
-
+const Dashboard: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   return (
     <>
       <Navbar />
@@ -99,60 +89,7 @@ function Dashboard() {
                 </button> */}
                     </header>
                     <div className="card-content">
-                      <div className="content">
-                        <Switch>
-                          <Route path={`${match.path}/blog`}>
-                            <Switch>
-                              <Route path={`${match.path}/blog/comment`}>
-                                <Comment />
-                              </Route>
-                              <Route path={`${match.path}/blog/tag/edit/:uid`}>
-                                <TagCreateEdit isEdit />
-                              </Route>
-                              <Route path={`${match.path}/blog/tag/create`}>
-                                <TagCreateEdit />
-                              </Route>
-                              <Route path={`${match.path}/blog/tag`}>
-                                <Tag />
-                              </Route>
-                              <Route
-                                path={`${match.path}/blog/category/edit/:uid`}
-                              >
-                                <CategoryCreateEdit isEdit />
-                              </Route>
-                              <Route
-                                path={`${match.path}/blog/category/create`}
-                              >
-                                <CategoryCreateEdit />
-                              </Route>
-                              <Route path={`${match.path}/blog/category`}>
-                                <Category />
-                              </Route>
-                              <Route
-                                path={`${match.path}/blog/content/edit/:uid`}
-                              >
-                                <CreateEdit isEdit />
-                              </Route>
-                              <Route path={`${match.path}/blog/content/create`}>
-                                <CreateEdit />
-                              </Route>
-                              <Route path={`${match.path}/blog/content`}>
-                                <Content />
-                              </Route>
-                              <Route path={`${match.path}/blog`}>
-                                <Blog />
-                              </Route>
-                            </Switch>
-                          </Route>
-
-                          <Route path={`${match.path}/page`}>
-                            <>Page</>
-                          </Route>
-                          <Route path={match.path}>
-                            <>Dashboard</>
-                          </Route>
-                        </Switch>
-                      </div>
+                      <div className="content">{children}</div>
                     </div>
                   </div>
                 </div>
@@ -172,6 +109,6 @@ function Dashboard() {
       </footer>
     </>
   );
-}
+};
 
 export default Dashboard;

@@ -1,13 +1,10 @@
 import dbs from "@app/config/db";
 
-
-
 type IRuleCustom = (config: {
   setMessage: (value: string) => boolean;
   value: string | number;
   label: string;
 }) => Promise<boolean> | boolean;
-
 
 type IRule = {
   required?: boolean;
@@ -40,15 +37,15 @@ type IBody = {
 type IErrMsg = {
   [key: string]: string[];
 };
-type IValidator = {
-  make: (
-    body: IBody,
-    rules: IRules
-  ) => Promise<{
-    fails: () => boolean;
-    getMessages: () => IErrMsg;
-  }>;
-};
+// type IValidator = {
+//   make: (
+//     body: IBody,
+//     rules: IRules
+//   ) => Promise<{
+//     fails: () => boolean;
+//     getMessages: () => IErrMsg;
+//   }>;
+// };
 
 // type IUniqueness = (
 //   model: keyof typeof models,
@@ -58,49 +55,58 @@ type IValidator = {
 //   ignoreIdColumn: string | null
 // ) => Promise<any>;
 
-
 const uniqueness = async function (
-    db: string,
+  db: string,
   table: string,
   column: string,
   value: IBodyValue,
   ignoreId?: string | null,
   ignoreIdColumn?: string | null
 ) {
-//   var modelnya = models[model];
-//   var query = {
-//     where: {},
-//   };
-//   query.where[column] = value;
-//   if (ignoreId != null && ignoreIdColumn != null) {
-//     query.where[ignoreIdColumn] = {
-//       [Op.ne]: ignoreId,
-//     };
-//   }
+  //   var modelnya = models[model];
+  //   var query = {
+  //     where: {},
+  //   };
+  //   query.where[column] = value;
+  //   if (ignoreId != null && ignoreIdColumn != null) {
+  //     query.where[ignoreIdColumn] = {
+  //       [Op.ne]: ignoreId,
+  //     };
+  //   }
 
-//   return modelnya.findAll(query);
-  var algo = ""
-  if(ignoreId!=null && ignoreIdColumn != null){
-      algo = algo + ' AND ' + ignoreIdColumn + ' != "' + ignoreId + '"';
+  //   return modelnya.findAll(query);
+  let algo = "";
+  if (ignoreId != null && ignoreIdColumn != null) {
+    algo = algo + " AND " + ignoreIdColumn + ' != "' + ignoreId + '"';
   }
-  const [result] = await dbs[db as keyof typeof dbs].execute('select * from '+table+' where '+column+'="'+value+'" '+algo+' limit 1');
+  const [result] = await dbs[db as keyof typeof dbs].execute(
+    "select * from " +
+      table +
+      " where " +
+      column +
+      '="' +
+      value +
+      '" ' +
+      algo +
+      " limit 1"
+  );
 
-  return result as unknown[] as any[]
+  return result as unknown[] as any[];
 };
 
 const Validator = {
-  make: async function (body:IBody, rules:IRules) {
+  make: async function (body: IBody, rules: IRules) {
     let error = 0;
-    let err_msg:IErrMsg = {};
-    for (let key in rules) {
-      let rule = rules[key as keyof typeof rules];
-      let label =
+    let err_msg: IErrMsg = {};
+    for (const key in rules) {
+      const rule = rules[key as keyof typeof rules];
+      const label =
         rule.label == null || rule.label === undefined || rule.label === ""
           ? key
           : rule.label;
 
       let noRule = 0;
-      for (let keyRule in rule.rule) {
+      for (const keyRule in rule.rule) {
         if (keyRule === "required") {
           if (rule.rule[keyRule]) {
             if (
@@ -110,9 +116,12 @@ const Validator = {
               body[key] === ""
             ) {
               if (noRule === 0) {
-                err_msg[key] = [];
+                err_msg = { ...err_msg, [key]: [] };
               }
-              err_msg[key].push(`${label} is required.`);
+              err_msg = {
+                ...err_msg,
+                [key]: [...err_msg[key], `${label} is required.`],
+              };
               noRule++;
               error++;
             }
@@ -121,10 +130,10 @@ const Validator = {
           }
         } else if (keyRule === "unique") {
           if (rule.rule[keyRule] !== undefined) {
-            let uniqueRule = rule.rule[keyRule].split(".");
-            let db = uniqueRule[0];
-            let table = uniqueRule[1];
-            let column = uniqueRule[2];
+            const uniqueRule = rule.rule[keyRule].split(".");
+            const db = uniqueRule[0];
+            const table = uniqueRule[1];
+            const column = uniqueRule[2];
             let ignoreId = null;
             let ignoreIdColumn = "id";
             if (uniqueRule[3] !== undefined) {
@@ -156,8 +165,7 @@ const Validator = {
           }
         } else if (keyRule === "email") {
           if (rule.rule[keyRule]) {
-            var re =
-              // eslint-disable-next-line no-useless-escape
+            const re =
               /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
             if (
               typeof body[key] !== "undefined" &&
@@ -173,11 +181,11 @@ const Validator = {
           }
         } else if (keyRule === "equalsTo") {
           if (rule.rule[keyRule]) {
-            var value2 = body[rule.rule[keyRule]];
+            const value2 = body[rule.rule[keyRule]];
 
-            var key2 = rule.rule[keyRule];
+            const key2 = rule.rule[keyRule];
 
-            var label2 =
+            const label2 =
               rules[key2].label == null ||
               rules[key2].label === undefined ||
               rules[key2].label === ""
@@ -199,17 +207,13 @@ const Validator = {
             !!rule.rule[keyRule]?.regex &&
             typeof rule.rule[keyRule]?.message !== "undefined"
           ) {
-            // eslint-disable-next-line no-eval
             const re = eval("/" + rule.rule[keyRule].regex + "/i");
 
             if (!re.test(body[key].toString().trim())) {
               if (noRule === 0) {
                 err_msg[key] = [];
               }
-              var new_message = (rule.rule[keyRule].message).replace(
-                "%s",
-                label
-              );
+              const new_message = rule.rule[keyRule].message.replace("%s", label);
               err_msg[key].push(new_message);
               noRule++;
               error++;
@@ -218,12 +222,12 @@ const Validator = {
         } else if (keyRule === "custom") {
           if (!!rule.rule[keyRule]) {
             let new_message = "";
-            const setMessage = (value:any) => {
+            const setMessage = (value: any) => {
               new_message = value;
               return false;
-            }
+            };
 
-            let result = await rule.rule[keyRule]({
+            const result = await rule.rule[keyRule]({
               setMessage,
               value: body[key],
               label,

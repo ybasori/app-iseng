@@ -6,12 +6,44 @@ import { store } from "./_states/store";
 import { Provider } from "react-redux";
 
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import Home from "./pages/Home/Home";
-import PublicBlog from "./pages/Blog/PublicBlog";
-import Login from "./pages/Login/Login";
-import About from "./pages/About/About";
-import Dashboard from "./pages/Dashboard/Dashboard";
 import PrivateRoute from "./components/atoms/PrivateRoute/PrivateRoute";
+import React from "react";
+import { IRoute, routes } from "./_config/config";
+
+
+
+const NestedRoute: React.FC<{ routes: IRoute[] }> = (props) => {
+  return (
+    <Switch>
+      {props.routes
+        .filter((item) => item.private)
+        .map(({ Component, ...item }, key) => (
+          <PrivateRoute key={key} path={item.path}>
+            {!!item.children && item.children.length > 0 ? (
+              <Component {...item.props}>
+                <NestedRoute routes={item.children} />
+              </Component>
+            ) : (
+              <Component {...item.props} />
+            )}
+          </PrivateRoute>
+        ))}
+      {props.routes
+        .filter((item) => !item.private)
+        .map(({ Component, ...item }, key) => (
+          <Route key={key} path={item.path}>
+            {!!item.children && item.children.length > 0 ? (
+              <Component {...item.props}>
+                <NestedRoute routes={item.children} />
+              </Component>
+            ) : (
+              <Component {...item.props} />
+            )}
+          </Route>
+        ))}
+    </Switch>
+  );
+};
 
 function App() {
   return (
@@ -20,23 +52,7 @@ function App() {
         <Notif>
           <FacebookProvider />
           <Router>
-            <Switch>
-              <PrivateRoute path="/dashboard">
-                <Dashboard />
-              </PrivateRoute>
-              <Route path="/about">
-                <About />
-              </Route>
-              <Route path="/login">
-                <Login />
-              </Route>
-              <Route path="/blog">
-                <PublicBlog />
-              </Route>
-              <Route path="/">
-                <Home />
-              </Route>
-            </Switch>
+            <NestedRoute routes={routes} />
           </Router>
         </Notif>
       </Provider>
