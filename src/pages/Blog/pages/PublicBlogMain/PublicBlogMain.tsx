@@ -1,6 +1,4 @@
-import {
-  setPage,
-} from "@src/_states/reducers/publicBlogContent/publicBlogContent.slice";
+import { setPage } from "@src/_states/reducers/publicBlogContent/publicBlogContent.slice";
 import { fetchPublicBlogContent } from "@src/_states/reducers/publicBlogContent/publicBlogContent.thunk";
 import { setFilter } from "@src/_states/reducers/publicBlogContent/publicBlogContent.slice";
 import { AppDispatch } from "@src/_states/store";
@@ -10,10 +8,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useLocation, useParams } from "react-router-dom";
 
 const PublicBlogMain = () => {
-    
-  const location = useLocation()
-    
-  const { uid } = useParams<{uid:string}>();
+  const location = useLocation();
+
+  const { uid } = useParams<{ uid: string }>();
   const [oneTime, setOneTime] = useState(true);
   const [loadContent, setLoadContent] = useState(false);
 
@@ -30,28 +27,32 @@ const PublicBlogMain = () => {
     return list;
   };
 
-  
-
   useEffect(() => {
     // Trigger data fetch or "reload" when path changes
     setOneTime(true);
-  }, [location.pathname])
+  }, [location.pathname]);
 
   useEffect(() => {
     if (oneTime) {
       setOneTime(false);
-    //   if (!!!publicBlogContent.response) {
-        if(!!uid && uid !== publicBlogContent.filter.leftJoin_category_uid){
-           dispatch(setFilter({leftJoin_category_uid:uid}) )
-           dispatch(setPage({ ...publicBlogContent.page, of: 1 }) )
-        }
-        if(!!!uid){
-           dispatch(setFilter({}) )
-        }
-        setLoadContent(true);
-    //   }
+      //   if (!!!publicBlogContent.response) {
+      if (!!uid && uid !== publicBlogContent.filter.leftJoin_category_uid) {
+        dispatch(setFilter({ leftJoin_category_uid: uid }));
+        dispatch(setPage({ ...publicBlogContent.page, of: 1 }));
+      }
+      if (!!!uid) {
+        dispatch(setFilter({}));
+      }
+      setLoadContent(true);
+      //   }
     }
-  }, [oneTime, uid, dispatch, publicBlogContent.filter, publicBlogContent.page]);
+  }, [
+    oneTime,
+    uid,
+    dispatch,
+    publicBlogContent.filter,
+    publicBlogContent.page,
+  ]);
 
   useEffect(() => {
     if (loadContent) {
@@ -75,7 +76,7 @@ const PublicBlogMain = () => {
   return (
     <>
       {publicBlogContent.loading ? (
-        "Loading..."
+        <i className="fa-solid fa-circle-notch fa-spin"></i>
       ) : (
         <>
           {(!!publicBlogContent.response

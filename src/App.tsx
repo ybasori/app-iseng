@@ -10,8 +10,6 @@ import PrivateRoute from "./components/atoms/PrivateRoute/PrivateRoute";
 import React from "react";
 import { IRoute, routes } from "./_config/config";
 
-
-
 const NestedRoute: React.FC<{ routes: IRoute[] }> = (props) => {
   return (
     <Switch>
@@ -24,7 +22,9 @@ const NestedRoute: React.FC<{ routes: IRoute[] }> = (props) => {
                 <NestedRoute routes={item.children} />
               </Component>
             ) : (
-              <Component {...item.props} />
+              <ErrorBoundary>
+                <Component {...item.props} />
+              </ErrorBoundary>
             )}
           </PrivateRoute>
         ))}
@@ -37,7 +37,9 @@ const NestedRoute: React.FC<{ routes: IRoute[] }> = (props) => {
                 <NestedRoute routes={item.children} />
               </Component>
             ) : (
-              <Component {...item.props} />
+              <ErrorBoundary>
+                <Component {...item.props} />
+              </ErrorBoundary>
             )}
           </Route>
         ))}
@@ -47,7 +49,6 @@ const NestedRoute: React.FC<{ routes: IRoute[] }> = (props) => {
 
 function App() {
   return (
-    <ErrorBoundary>
       <Provider store={store}>
         <Notif>
           <FacebookProvider />
@@ -56,7 +57,6 @@ function App() {
           </Router>
         </Notif>
       </Provider>
-    </ErrorBoundary>
   );
 }
 

@@ -70,7 +70,7 @@ const PublicBlog:React.FC<{children?:React.ReactNode}> = ({children}) => {
                   </p>
                 </div>
                 {publicBlogCategory.loading ? (
-                  "Loading..."
+                  <i className="fa-solid fa-circle-notch fa-spin"></i>
                 ) : (
                   <>
                     {(!!publicBlogCategory.response

@@ -163,7 +163,7 @@ const PublicBlogContentDetail = () => {
     <>
             <>
               {publicBlogContentDetail.loading ? (
-                "Loading..."
+                <i className="fa-solid fa-circle-notch fa-spin"></i>
               ) : (
                 <>
                   {(!!publicBlogContentDetail.response
