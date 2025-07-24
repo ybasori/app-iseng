@@ -1,11 +1,13 @@
-import { useDispatch } from "@src/components/atoms/GlobalState";
 import { useState } from "react";
-import { notify } from "@src/_states/reducers/notif/notif.action";
+import { notify } from "@src/_states/reducers/notif/notif.thunk";
 import { navigate } from "@src/helper/helper";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@src/_states/store";
+import { login } from "@src/_states/reducers/auth/auth.slice";
 
 const Login = () => {
     // const {auth} = useSelector();
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<AppDispatch>();
     const [form, setForm] = useState({
         username:"",
         password:""
@@ -25,12 +27,9 @@ const Login = () => {
                     return res.json();
                 })
               .then(data => {
-                    dispatch(notify("", data.message, 5000))
+                    dispatch(notify({title:"", text:data.message, timer:5000}))
                 if(data.statusCode === 200){
-                    dispatch({
-                        type: "auth/LOGIN",
-                        payload: data.result
-                    });
+                    dispatch(login(data.result));
                     navigate("/");
 
                 }

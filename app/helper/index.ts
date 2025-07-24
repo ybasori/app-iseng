@@ -101,7 +101,7 @@ export const renderHtml = (payload?: { title?: string; reducer?: any }) => {
         <!---<div id="fb-root"></div>
 <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v23.0&appId=1282849900174718"></script> -->
         <script>
-      window.__PRELOADED_STATE__ = ${JSON.stringify(reducer)};
+      window.__PRELOADED_STATE__ = ${reducer==="{}"?reducer:JSON.stringify(reducer)};
         </script>
         <script src="/assets/js/app.bundle.js"></script>
         <script src="/assets/js/runtime.bundle.js"></script>

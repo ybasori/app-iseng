@@ -1,21 +1,26 @@
-import { notify } from "@src/_states/reducers/notif/notif.action";
-import { useDispatch, useSelector } from "@src/components/atoms/GlobalState";
+import { notify } from "@src/_states/reducers/notif/notif.thunk";
 import useForm, { ICallbackSubmit } from "@src/hooks/useForm";
 import * as yup from "yup";
 import { ITagCreateEdit } from "./TagCreateEdit.type";
 import { useCallback, useEffect, useState } from "react";
 import {
-  fetchBlogTag,
   setPage,
   setSort,
-} from "@src/_states/reducers/blogTag/blogTag.action";
+} from "@src/_states/reducers/blogTag/blogTag.slice";
+import {
+  fetchBlogTag,
+} from "@src/_states/reducers/blogTag/blogTag.thunk";
 import { navigate } from "@src/helper/helper";
 import { api } from "../../../../../../../_config/config";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "@src/_states/store";
+import { RootState } from "@src/_states/types";
 
 const TagCreateEdit: React.FC<ITagCreateEdit> = ({ isEdit }) => {
   const [oneTime, setOneTime] = useState(isEdit);
-  const { blogTag, route } = useSelector();
-  const dispatch = useDispatch();
+  const blogTag = useSelector((state:RootState)=>(state.blogTag));
+  const route = useSelector((state:RootState)=>(state.route));
+  const dispatch = useDispatch<AppDispatch>();
 
   const validation = () => {
     return yup.object().shape({
@@ -59,7 +64,7 @@ const TagCreateEdit: React.FC<ITagCreateEdit> = ({ isEdit }) => {
         }
       })
       .catch(() => {
-        dispatch(notify("", "Something went wrong!", 5000));
+        dispatch(notify({title:"", text:"Something went wrong!", timer:5000}));
       });
   }, [dispatch, route.params.uid, setDefaultForm]);
 
@@ -79,7 +84,7 @@ const TagCreateEdit: React.FC<ITagCreateEdit> = ({ isEdit }) => {
       })
       .then((data) => {
         setSubmitting(false);
-        dispatch(notify("", data.message, 5000));
+        dispatch(notify({title:"", text:data.message, timer:5000}));
         if (data.statusCode === 200) {
           dispatch(
             setPage({
@@ -96,19 +101,19 @@ const TagCreateEdit: React.FC<ITagCreateEdit> = ({ isEdit }) => {
             ])
           );
           dispatch(
-            fetchBlogTag(
-              blogTag.page,
-              blogTag.sort,
-              blogTag.filter,
-              ["uid", "name", "created_at", "updated_at"]
-            )
+            fetchBlogTag({
+              page:blogTag.page,
+              sort:blogTag.sort,
+              filter:blogTag.filter,
+              show:["uid", "name", "created_at", "updated_at"]
+            })
           );
           navigate("/dashboard/blog/tag");
         }
       })
       .catch(() => {
         setSubmitting(false);
-        dispatch(notify("", "Something went wrong!", 5000));
+        dispatch(notify({title:"", text:"Something went wrong!", timer:5000}));
       });
   };
 

@@ -1,21 +1,24 @@
-import { notify } from "@src/_states/reducers/notif/notif.action";
-import { useDispatch, useSelector } from "@src/components/atoms/GlobalState";
+import { notify } from "@src/_states/reducers/notif/notif.thunk";
 import useForm, { ICallbackSubmit } from "@src/hooks/useForm";
 import * as yup from "yup";
 import { ICategoryCreateEdit } from "./CategoryCreateEdit.type";
 import { useCallback, useEffect, useState } from "react";
 import {
-  fetchBlogCategory,
   setPage,
   setSort,
-} from "@src/_states/reducers/blogCategory/blogCategory.action";
+} from "@src/_states/reducers/blogCategory/blogCategory.slice";
+import { fetchBlogCategory } from "@src/_states/reducers/blogCategory/blogCategory.thunk";
 import { navigate } from "@src/helper/helper";
 import { api } from "../../../../../../../_config/config";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "@src/_states/store";
+import { RootState } from "@src/_states/types";
 
 const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
   const [oneTime, setOneTime] = useState(isEdit);
-  const { blogCategory, route } = useSelector();
-  const dispatch = useDispatch();
+  const blogCategory = useSelector((state:RootState)=>(state.blogCategory));
+  const route = useSelector((state:RootState)=>(state.route));
+  const dispatch = useDispatch<AppDispatch>();
 
   const validation = () => {
     return yup.object().shape({
@@ -59,13 +62,19 @@ const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
         }
       })
       .catch(() => {
-        dispatch(notify("", "Something went wrong!", 5000));
+        dispatch(
+          notify({ title: "", text: "Something went wrong!", timer: 5000 })
+        );
       });
   }, [dispatch, route.params.uid, setDefaultForm]);
 
   const onSubmit: ICallbackSubmit = (values, { setSubmitting }) => {
     fetch(
-      `${isEdit ? `${api.DASHBOARD_BLOG_CATEGORY_UPDATE}/${route.params.uid}` : `${api.DASHBOARD_BLOG_CATEGORY_CREATE}`}`,
+      `${
+        isEdit
+          ? `${api.DASHBOARD_BLOG_CATEGORY_UPDATE}/${route.params.uid}`
+          : `${api.DASHBOARD_BLOG_CATEGORY_CREATE}`
+      }`,
       {
         method: `${isEdit ? "PUT" : "POST"}`,
         headers: {
@@ -79,7 +88,7 @@ const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
       })
       .then((data) => {
         setSubmitting(false);
-        dispatch(notify("", data.message, 5000));
+        dispatch(notify({title:"", text:data.message, timer:5000}));
         if (data.statusCode === 200) {
           dispatch(
             setPage({
@@ -96,19 +105,19 @@ const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
             ])
           );
           dispatch(
-            fetchBlogCategory(
-              blogCategory.page,
-              blogCategory.sort,
-              blogCategory.filter,
-              ["uid", "name", "created_at", "updated_at"]
-            )
+            fetchBlogCategory({
+              page:blogCategory.page,
+              sort:blogCategory.sort,
+              filter:blogCategory.filter,
+              show:["uid", "name", "created_at", "updated_at"]
+            })
           );
           navigate("/dashboard/blog/category");
         }
       })
       .catch(() => {
         setSubmitting(false);
-        dispatch(notify("", "Something went wrong!", 5000));
+        dispatch(notify({title:"", text:"Something went wrong!", timer:5000}));
       });
   };
 
@@ -139,9 +148,7 @@ const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
             </span>
           ) : null}
         </div>
-        {!!errors.name ? (
-          <p className="help is-danger">{errors.name}</p>
-        ) : null}
+        {!!errors.name ? <p className="help is-danger">{errors.name}</p> : null}
       </div>
 
       <div className="field is-grouped">

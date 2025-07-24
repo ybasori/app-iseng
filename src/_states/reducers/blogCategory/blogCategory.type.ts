@@ -6,6 +6,7 @@ export interface IBlogCategoryState {
     result: {
       data: {
         id: number;
+        uid: string;
         title: string;
         content: string;
         created_at: string;

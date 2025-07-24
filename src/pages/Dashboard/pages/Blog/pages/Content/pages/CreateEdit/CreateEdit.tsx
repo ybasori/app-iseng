@@ -1,23 +1,28 @@
 import {
-  fetchBlogContent,
   setPage,
   setSort,
-} from "@src/_states/reducers/blogContent/blogContent.action";
-import { notify } from "@src/_states/reducers/notif/notif.action";
-import { useDispatch, useSelector } from "@src/components/atoms/GlobalState";
+} from "@src/_states/reducers/blogContent/blogContent.slice";
+import {
+  fetchBlogContent,
+} from "@src/_states/reducers/blogContent/blogContent.thunk";
+import { notify } from "@src/_states/reducers/notif/notif.thunk";
 import useForm, { ICallbackSubmit } from "@src/hooks/useForm";
 import * as yup from "yup";
 import { ICreateEdit } from "./CreateEdit.type";
 import { useCallback, useEffect, useState } from "react";
 import { navigate } from "@src/helper/helper";
 import { api } from "../../../../../../../../_config/config";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "@src/_states/store";
+import { RootState } from "@src/_states/types";
 
 const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
   const [oneTime, setOneTime] = useState(true);
   const [categories, setCategories] = useState<any[]>([]);
   const [tags, setTags] = useState<any[]>([]);
-  const { blogContent, route } = useSelector();
-  const dispatch = useDispatch();
+  const blogContent = useSelector((state:RootState)=>(state.blogContent));
+  const route = useSelector((state:RootState)=>(state.route));
+  const dispatch = useDispatch<AppDispatch>();
 
   const validation = () => {
     return yup.object().shape({
@@ -58,7 +63,7 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
         setCategories([...data.result.data]);
       })
       .catch(() => {
-        dispatch(notify("", "Something went wrong!", 5000));
+        dispatch(notify({title:"", text:"Something went wrong!", timer:5000}));
       });
   }, [dispatch]);
 
@@ -76,7 +81,7 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
         setTags([...data.result.data]);
       })
       .catch(() => {
-        dispatch(notify("", "Something went wrong!", 5000));
+        dispatch(notify({title:"", text:"Something went wrong!", timer:5000}));
       });
   }, [dispatch]);
 
@@ -104,7 +109,7 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
         }
       })
       .catch(() => {
-        dispatch(notify("", "Something went wrong!", 5000));
+        dispatch(notify({title:"", text:"Something went wrong!", timer:5000}));
       });
   }, [dispatch, route.params.uid, setDefaultForm]);
 
@@ -129,7 +134,7 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
       })
       .then((data) => {
         setSubmitting(false);
-        dispatch(notify("", data.message, 5000));
+        dispatch(notify({title:"", text:data.message, timer:5000}));
         if (data.statusCode === 200) {
           dispatch(
             setPage({
@@ -147,16 +152,16 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
           );
           dispatch(
             fetchBlogContent(
-              blogContent.page,
-              blogContent.sort,
-              blogContent.filter,
-              [
+              {page:blogContent.page,
+              sort:blogContent.sort,
+              filter:blogContent.filter,
+              show:[
                 "uid",
                 "title",
                 "created_at",
                 "updated_at",
                 "leftJoin_category_name",
-              ]
+              ]}
             )
           );
           navigate("/dashboard/blog/content");
@@ -164,7 +169,7 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
       })
       .catch(() => {
         setSubmitting(false);
-        dispatch(notify("", "Something went wrong!", 5000));
+        dispatch(notify({title:"", text:"Something went wrong!", timer:5000}));
       });
   };
 

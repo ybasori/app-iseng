@@ -1,16 +1,20 @@
 import {
-  fetchPublicBlogContent,
   setPage,
-} from "@src/_states/reducers/publicBlogContent/publicBlogContent.action";
-import { useDispatch, useSelector } from "@src/components/atoms/GlobalState";
+} from "@src/_states/reducers/publicBlogContent/publicBlogContent.slice";
+import {
+  fetchPublicBlogContent,
+} from "@src/_states/reducers/publicBlogContent/publicBlogContent.thunk";
+import { AppDispatch } from "@src/_states/store";
+import { RootState } from "@src/_states/types";
 import Link from "@src/components/atoms/Link/Link";
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 function Home() {
   const [oneTime, setOneTime] = useState(true);
   const [loadContent, setLoadContent] = useState(false);
-  const { publicBlogContent } = useSelector();
-  const dispatch = useDispatch();
+  const publicBlogContent = useSelector((state:RootState)=>(state.publicBlogContent));
+  const dispatch = useDispatch<AppDispatch>();
 
   const listPage = (total: number) => {
     let list: number[] = [];
@@ -33,12 +37,12 @@ function Home() {
     if (loadContent) {
       setLoadContent(false);
       dispatch(
-        fetchPublicBlogContent(
-          publicBlogContent.page,
-          publicBlogContent.sort,
-          publicBlogContent.filter,
-          ["uid", "title", "content", "created_at", "updated_at"]
-        )
+        fetchPublicBlogContent({
+          page:publicBlogContent.page,
+          sort:publicBlogContent.sort,
+          filter:publicBlogContent.filter,
+          show:["uid", "title", "content", "created_at", "updated_at"]
+        })
       );
     }
   }, [
@@ -63,12 +67,7 @@ function Home() {
                     : []
                   ).map(
                     (
-                      item: {
-                        title: string;
-                        content: string;
-                        created_at: string;
-                        uid: string;
-                      },
+                      item,
                       key: number
                     ) => (
                       <React.Fragment key={key}>
@@ -122,7 +121,7 @@ function Home() {
                   className={`pagination-next ${
                     publicBlogContent.page.of ===
                     (Math.ceil(
-                      publicBlogContent.response?.result.total /
+                      (publicBlogContent.response?.result.total ?? 1) /
                         publicBlogContent.page.size
                     ) ?? 1)
                       ? `is-disabled`
@@ -134,7 +133,7 @@ function Home() {
                     if (
                       publicBlogContent.page.of <
                       (Math.ceil(
-                        publicBlogContent.response?.result.total /
+                        (publicBlogContent.response?.result.total ?? 1) /
                           publicBlogContent.page.size
                       ) ?? 1)
                     ) {
@@ -163,7 +162,7 @@ function Home() {
 
                   {listPage(
                     Math.ceil(
-                      publicBlogContent.response?.result.total /
+                      (publicBlogContent.response?.result.total ?? 1) /
                         publicBlogContent.page.size
                     ) ?? 1
                   )
@@ -171,14 +170,14 @@ function Home() {
                       (item) =>
                         publicBlogContent.page.of -
                           ((Math.ceil(
-                            publicBlogContent.response?.result.total /
+                            (publicBlogContent.response?.result.total ?? 1) /
                               publicBlogContent.page.size
                           ) ?? 1) -
                             publicBlogContent.page.of <=
                           2
                             ? 5 -
                               ((Math.ceil(
-                                publicBlogContent.response?.result.total /
+                                (publicBlogContent.response?.result.total ?? 1) /
                                   publicBlogContent.page.size
                               ) ?? 1) -
                                 publicBlogContent.page.of)

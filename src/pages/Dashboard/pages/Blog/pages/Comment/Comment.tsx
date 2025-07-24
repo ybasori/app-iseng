@@ -8,7 +8,8 @@ import Table from "@src/components/atoms/Table/Table";
 import { api } from "../../../../../../_config/config";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@src/_states/store";
+import { AppDispatch } from "@src/_states/store";
+import { RootState } from "@src/_states/types";
 import { fetchBlogComment } from "@src/_states/reducers/blogComment/blogComment.thunk";
 import { notify } from "@src/_states/reducers/notif/notif.thunk";
 
@@ -18,7 +19,7 @@ const Comment = () => {
   const [deleteMoreModal, setDeleteMoreModal] = useState(false);
   const [dataChecked, setDataChecked] = useState<number[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const { blogComment } = useSelector((state: RootState) => state);
+  const blogComment = useSelector((state: RootState) => (state.blogComment));
   const dispatch = useDispatch<AppDispatch>();
 
   const onDeleteMore = (index: number = 0) => {

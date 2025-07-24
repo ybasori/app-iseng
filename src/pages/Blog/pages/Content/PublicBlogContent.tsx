@@ -1,15 +1,19 @@
 import { api } from "@src/_config/config";
-import { notify } from "@src/_states/reducers/notif/notif.action";
+import { notify } from "@src/_states/reducers/notif/notif.thunk";
+import {
+  setFilter,
+} from "@src/_states/reducers/publicBlogContentDetail/publicBlogContentDetail.slice";
 import {
   fetchPublicBlogContentDetail,
-  setFilter,
-} from "@src/_states/reducers/publicBlogContentDetail/publicBlogContentDetail.action";
+} from "@src/_states/reducers/publicBlogContentDetail/publicBlogContentDetail.thunk";
+import { AppDispatch } from "@src/_states/store";
+import { RootState } from "@src/_states/types";
 import FacebookComment from "@src/components/atoms/FacebookComment/FacebookComment";
-import { useDispatch, useSelector } from "@src/components/atoms/GlobalState";
 import Link from "@src/components/atoms/Link/Link";
 import useForm, { ICallbackSubmit } from "@src/hooks/useForm";
 // import useWindowWidth from "@src/hooks/useWindowWidth";
 import React, { useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import * as yup from "yup";
 
 const PublicBlogContent = () => {
@@ -18,14 +22,15 @@ const PublicBlogContent = () => {
   const [loadComment, setLoadComment] = useState(false);
   const [commentList, setCommentList] = useState<any[]>([]);
   const [totalComment, setTotalComment] = useState<number>(0);
-  const { publicBlogContentDetail, route } = useSelector();
+  const publicBlogContentDetail = useSelector((state:RootState)=>(state.publicBlogContentDetail));
+  const route = useSelector((state:RootState)=>(state.route));
 
   const [page, setPage] = useState({
     of: 1,
     size: 10,
   });
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   // const width = useWindowWidth();
 
   const listPage = (total: number) => {
@@ -75,7 +80,7 @@ const PublicBlogContent = () => {
         setTotalComment(data.result.total);
       })
       .catch(() => {
-        dispatch(notify("", "Something went wrong!", 5000));
+        dispatch(notify({title:"", text:"Something went wrong!", timer:5000}));
       });
   }, [dispatch, page.of, page.size, route.params.uid]);
 
@@ -95,13 +100,13 @@ const PublicBlogContent = () => {
       })
       .then((data) => {
         setSubmitting(false);
-        dispatch(notify("", data.message, 5000));
+        dispatch(notify({title:"", text:data.message, timer:5000}));
         handleReset();
         onGetComment();
       })
       .catch(() => {
         setSubmitting(false);
-        dispatch(notify("", "Something went wrong!", 5000));
+        dispatch(notify({title:"", text:"Something went wrong!", timer:5000}));
       });
   };
 
@@ -121,12 +126,12 @@ const PublicBlogContent = () => {
     if (loadContent) {
       setLoadContent(false);
       dispatch(
-        fetchPublicBlogContentDetail(
-          publicBlogContentDetail.page,
-          publicBlogContentDetail.sort,
-          publicBlogContentDetail.filter,
-          ["uid", "title", "content", "created_at", "updated_at"]
-        )
+        fetchPublicBlogContentDetail({
+          page: publicBlogContentDetail.page,
+          sort: publicBlogContentDetail.sort,
+          filter: publicBlogContentDetail.filter,
+          show: ["uid", "title", "content", "created_at", "updated_at"]
+        })
       );
       setLoadComment(true);
       onGetComment();
@@ -169,12 +174,7 @@ const PublicBlogContent = () => {
                     : []
                   ).map(
                     (
-                      item: {
-                        title: string;
-                        content: string;
-                        created_at: string;
-                        uid: string;
-                      },
+                      item,
                       key: number
                     ) => (
                       <React.Fragment key={key}>

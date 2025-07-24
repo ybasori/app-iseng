@@ -1,8 +1,9 @@
-import Link from "@src/components/atoms/Link/Link";
-import { useSelector } from "@src/components/atoms/GlobalState";
+// import { RootState } from "@src/_states/types";
+// import { useSelector } from "react-redux";
+
 
 function Dashboard() {
-  const { auth } = useSelector();
+  // const { auth } = useSelector((state:RootState)=>state);
   return (
     <>
 

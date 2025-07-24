@@ -1,8 +1,9 @@
+import { RootState } from "@src/_states/types";
 import Link from "@src/components/atoms/Link/Link";
-import { useSelector } from "@src/components/atoms/GlobalState";
+import { useSelector } from "react-redux";
 
 function About() {
-  const {auth} = useSelector();
+  const auth = useSelector((state:RootState)=>(state.auth));
   return (
     <>
       About

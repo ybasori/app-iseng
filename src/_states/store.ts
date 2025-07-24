@@ -1,15 +1,6 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore, Middleware } from "@reduxjs/toolkit";
 import auth from "./reducers/auth/auth.slice";
-import { AuthState } from "./reducers/auth/auth.type";
 import blogCategory from "./reducers/blogCategory/blogCategory.slice";
-import { IBlogCategoryState } from "./reducers/blogCategory/blogCategory.type";
-import { IBlogCommentState } from "./reducers/blogComment/blogComment.type";
-import { IBlogContentState } from "./reducers/blogContent/blogContent.type";
-import { IBlogTagState } from "./reducers/blogTag/blogTag.type";
-import { NotifState } from "./reducers/notif/notif.type";
-import { IPublicBlogContentState } from "./reducers/publicBlogContent/publicBlogContent.type";
-import { IPublicBlogContentDetailState } from "./reducers/publicBlogContentDetail/publicBlogContentDetail.type";
-import { RouteState } from "./reducers/route/route.type";
 import blogComment from "./reducers/blogComment/blogComment.slice";
 import blogContent from "./reducers/blogContent/blogContent.slice";
 import blogTag from "./reducers/blogTag/blogTag.slice";
@@ -17,17 +8,27 @@ import notif from "./reducers/notif/notif.slice";
 import publicBlogContent from "./reducers/publicBlogContent/publicBlogContent.slice";
 import publicBlogContentDetail from "./reducers/publicBlogContentDetail/publicBlogContentDetail.slice";
 import route from "./reducers/route/route.slice";
+import { RootState } from "./types";
 
-export interface RootState {
-  auth: AuthState;
-  blogCategory: IBlogCategoryState;
-  blogComment: IBlogCommentState;
-  blogContent: IBlogContentState;
-  blogTag: IBlogTagState;
-  notif: NotifState;
-  publicBlogContent: IPublicBlogContentState;
-  publicBlogContentDetail: IPublicBlogContentDetailState;
-  route: RouteState;
+const preloadedState = 
+  (window as unknown as Window & { __PRELOADED_STATE__: RootState })
+    .__PRELOADED_STATE__;
+
+
+
+const logger: Middleware<unknown, RootState> = ({ getState }) => {
+  return (next) => (action) => {
+      console.log('will dispatch', action)
+
+    // Call the next dispatch method in the middleware chain.
+    const returnValue = next(action);
+
+      console.log('state after dispatch', getState())
+
+    // This will likely be the action itself, unless
+    // a middleware further in chain changed it.
+    return returnValue;
+  };
 }
 
 export const store = configureStore({
@@ -42,9 +43,11 @@ export const store = configureStore({
     publicBlogContentDetail,
     route,
   },
-  preloadedState: (
-    window as unknown as Window & { __PRELOADED_STATE__: RootState }
-  ).__PRELOADED_STATE__,
+  preloadedState,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false, // ✅ disables check completely
+    }).concat(logger),
 });
 
 // Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}

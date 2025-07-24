@@ -12,8 +12,10 @@ import { match } from "path-to-regexp";
 import FacebookProvider from "./components/atoms/FacebookProvier/FacebookProvider";
 
 
-import { RootState, store } from './_states/store'
+import { store } from './_states/store'
+import { RootState } from './_states/types'
 import { Provider, useDispatch, useSelector } from 'react-redux'
+import { navigate } from "./_states/reducers/route/route.slice";
 
 const Template: React.FC<{ Component?: any; children: React.ReactNode }> = ({
   Component,
@@ -26,7 +28,8 @@ const Template: React.FC<{ Component?: any; children: React.ReactNode }> = ({
 };
 
 const PageNavigate = () => {
-  const { route, auth } = useSelector((state: RootState) => state);
+  const route = useSelector((state: RootState) => (state.route));
+  const auth = useSelector((state: RootState) => (state.auth));
   const dispatch = useDispatch();
 
   const pathname = usePathname();
@@ -48,10 +51,7 @@ const PageNavigate = () => {
 
     const nice = router[matchPath as keyof typeof router];
 
-    dispatch({
-      type: `route/NAVIGATE`,
-      payload: { current: pathname, ...nice, ...matchRoute },
-    });
+    dispatch(navigate({ current: pathname, ...nice, ...matchRoute }));
   }, [dispatch, pathname]);
 
   // useEffect(() => {

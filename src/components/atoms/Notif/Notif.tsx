@@ -1,9 +1,11 @@
-import { updateNotif } from "@src/_states/reducers/notif/notif.action";
-import { useDispatch, useSelector } from "../GlobalState";
+import { update } from "@src/_states/reducers/notif/notif.slice";
+import { AppDispatch } from "@src/_states/store";
+import { RootState } from "@src/_states/types";
+import { useDispatch, useSelector } from "react-redux";
 
 const Notif: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { notif } = useSelector();
-  const dispatch = useDispatch();
+  const notif = useSelector((state:RootState)=>(state.notif));
+  const dispatch = useDispatch<AppDispatch>();
 
   return (
     <>
@@ -17,7 +19,7 @@ const Notif: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <button
                 className="delete"
                 type="button"
-                onClick={() => dispatch(updateNotif({ ...item, hide: true }))}
+                onClick={() => dispatch(update({ ...item, hide: true }))}
               ></button>
             </div>
             <div className="message-body">{item.text}</div>

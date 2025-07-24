@@ -1,16 +1,20 @@
 import {
-  fetchBlogContent,
   setFilter,
   setPage,
   setSort,
-} from "@src/_states/reducers/blogContent/blogContent.action";
-import { notify } from "@src/_states/reducers/notif/notif.action";
-import { useDispatch, useSelector } from "@src/components/atoms/GlobalState";
+} from "@src/_states/reducers/blogContent/blogContent.slice";
+import {
+  fetchBlogContent,
+} from "@src/_states/reducers/blogContent/blogContent.thunk";
+import { notify } from "@src/_states/reducers/notif/notif.thunk";
 import Link from "@src/components/atoms/Link/Link";
 import Modal from "@src/components/atoms/Modal/Modal";
 import Table from "@src/components/atoms/Table/Table";
 import { api } from "../../../../../../_config/config";
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "@src/_states/store";
+import { RootState } from "@src/_states/types";
 
 const Content = () => {
   const [oneTime, setOneTime] = useState(true);
@@ -18,14 +22,14 @@ const Content = () => {
   const [deleteMoreModal, setDeleteMoreModal] = useState(false);
   const [dataChecked, setDataChecked] = useState<number[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const { blogContent } = useSelector();
-  const dispatch = useDispatch();
+  const blogContent = useSelector((state:RootState)=>(state.blogContent));
+  const dispatch = useDispatch<AppDispatch>();
 
   const onDeleteMore = (index: number = 0) => {
     setSubmitting(true);
     fetch(
       `${api.DASHBOARD_BLOG_CONTENT_DELETE}/${
-        blogContent.response.result.data[dataChecked[index]].uid
+        blogContent.response?.result.data[dataChecked[index]].uid
       }`,
       {
         method: "DELETE",
@@ -42,7 +46,7 @@ const Content = () => {
           onDeleteMore(index + 1);
         } else {
           setSubmitting(false);
-          dispatch(notify("", data.message, 5000));
+          dispatch(notify({title:"", text:data.message, timer:5000}));
           setDeleteMoreModal(false);
           setDataChecked([]);
           dispatch(
@@ -60,25 +64,25 @@ const Content = () => {
             ])
           );
           dispatch(
-            fetchBlogContent(
-              blogContent.page,
-              blogContent.sort,
-              blogContent.filter,
-              [
+            fetchBlogContent({
+              page:blogContent.page,
+              sort:blogContent.sort,
+              filter:blogContent.filter,
+              show:[
                 "uid",
                 "title",
                 "created_at",
                 "updated_at",
                 "leftJoin_category_name",
               ]
-            )
+            })
           );
         }
       })
       .catch((err) => {
         console.log(err);
         setSubmitting(false);
-        dispatch(notify("", "Something went wrong!", 5000));
+        dispatch(notify({title:"", text:"Something went wrong!", timer:5000}));
       });
   };
 
@@ -95,12 +99,18 @@ const Content = () => {
     if (loadContent) {
       setLoadContent(false);
       dispatch(
-        fetchBlogContent(
-          blogContent.page,
-          blogContent.sort,
-          blogContent.filter,
-          ["uid", "title", "created_at", "updated_at", "leftJoin_category_name"]
-        )
+        fetchBlogContent({
+              page:blogContent.page,
+              sort:blogContent.sort,
+              filter:blogContent.filter,
+              show:[
+                "uid",
+                "title",
+                "created_at",
+                "updated_at",
+                "leftJoin_category_name",
+              ]
+            })
       );
     }
   }, [
@@ -149,7 +159,7 @@ const Content = () => {
         page={blogContent.page}
         totalPage={
           Math.ceil(
-            blogContent.response?.result.total / blogContent.page.size
+           ( blogContent.response?.result.total ?? 1) / blogContent.page.size
           ) ?? 1
         }
         onPage={(page) => {

@@ -6,6 +6,7 @@ export interface IBlogContentState {
     result: {
       data: {
         id: number;
+        uid: string;
         title: string;
         content: string;
         created_at: string;

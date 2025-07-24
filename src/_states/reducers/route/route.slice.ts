@@ -17,11 +17,13 @@ export const route = createSlice({
   initialState,
   reducers: {
     navigate: (state, action: PayloadAction<RouteState>) => {
-      state = {
-        isProtected: false,
-        Template: null,
-        component: null, ...action.payload
-      }
+
+      state.current = action.payload.current;
+      state.name = action.payload.name;
+      state.isProtected = action.payload.isProtected;
+      state.Template = action.payload.Template;
+      state.component = action.payload.component;
+      state.params = action.payload.params;
     },
     updateName: (
       state,
