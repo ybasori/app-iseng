@@ -3,7 +3,7 @@ import cookieParser from "cookie-parser";
 // import routes from "./routes";
 // import { expandRouter } from "./helper";
 import dotenv from "dotenv";
-import fs from 'fs';
+// import fs from 'fs';
 import https from 'https';
 
 dotenv.config();
@@ -70,19 +70,19 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 
-if(process.env.NODE_ENV !== "production"){
+// if(process.env.NODE_ENV !== "production"){
 
-const key = fs.readFileSync('./ssl/key.pem');
-const cert = fs.readFileSync('./ssl/cert.pem');
+// const key = fs.readFileSync('./ssl/key.pem');
+// const cert = fs.readFileSync('./ssl/cert.pem');
 
-https.createServer({ key, cert }, app).listen(process.env.PORT, () => {
-  console.log(`server running on port ${process.env.PORT}`);
-});
+// https.createServer({ key, cert }, app).listen(process.env.PORT, () => {
+//   console.log(`server running on port ${process.env.PORT}`);
+// });
 
-}
-else{
+// }
+// else{
   
 https.createServer(app).listen(process.env.PORT, () => {
   console.log(`server running on port ${process.env.PORT}`);
 });
-}
+// }
