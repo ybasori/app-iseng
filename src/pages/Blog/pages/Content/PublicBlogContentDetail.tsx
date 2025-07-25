@@ -345,7 +345,7 @@ const PublicBlogContentDetail = () => {
                           </a>
                           <a
                             className={`pagination-next ${
-                              page.of === Math.ceil(totalComment / page.size)
+                              page.of === Math.ceil((totalComment ?? 1) / page.size)
                                 ? `is-disabled`
                                 : ``
                             }`}
@@ -353,7 +353,7 @@ const PublicBlogContentDetail = () => {
                               e.preventDefault();
 
                               if (
-                                page.of < Math.ceil(totalComment / page.size)
+                                page.of < Math.ceil((totalComment ?? 1) / page.size)
                               ) {
                                 setPage({ ...page, of: page.of + 1 });
                                 setLoadComment(true);
@@ -372,15 +372,15 @@ const PublicBlogContentDetail = () => {
             <span className="pagination-ellipsis">&hellip;</span>
           </li> */}
 
-                            {listPage(Math.ceil(totalComment / page.size))
+                            {listPage(Math.ceil((totalComment ?? 1) / page.size))
                               .filter(
                                 (item) =>
                                   page.of -
-                                    (Math.ceil(totalComment / page.size) -
+                                    (Math.ceil((totalComment ?? 1) / page.size) -
                                       page.of <=
                                     2
                                       ? 5 -
-                                        (Math.ceil(totalComment / page.size) -
+                                        (Math.ceil((totalComment ?? 1) / page.size) -
                                           page.of)
                                       : 3) <
                                     item &&
