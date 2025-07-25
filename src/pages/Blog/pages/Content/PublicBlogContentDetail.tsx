@@ -345,7 +345,7 @@ const PublicBlogContentDetail = () => {
                           </a>
                           <a
                             className={`pagination-next ${
-                              page.of === Math.ceil((totalComment ?? 1) / page.size)
+                              page.of === Math.ceil((totalComment==0?1:totalComment) / page.size)
                                 ? `is-disabled`
                                 : ``
                             }`}
@@ -353,7 +353,7 @@ const PublicBlogContentDetail = () => {
                               e.preventDefault();
 
                               if (
-                                page.of < Math.ceil((totalComment ?? 1) / page.size)
+                                page.of < Math.ceil((totalComment==0?1:totalComment) / page.size)
                               ) {
                                 setPage({ ...page, of: page.of + 1 });
                                 setLoadComment(true);
@@ -372,15 +372,15 @@ const PublicBlogContentDetail = () => {
             <span className="pagination-ellipsis">&hellip;</span>
           </li> */}
 
-                            {listPage(Math.ceil((totalComment ?? 1) / page.size))
+                            {listPage(Math.ceil((totalComment==0?1:totalComment) / page.size))
                               .filter(
                                 (item) =>
                                   page.of -
-                                    (Math.ceil((totalComment ?? 1) / page.size) -
+                                    (Math.ceil((totalComment==0?1:totalComment) / page.size) -
                                       page.of <=
                                     2
                                       ? 5 -
-                                        (Math.ceil((totalComment ?? 1) / page.size) -
+                                        (Math.ceil((totalComment==0?1:totalComment) / page.size) -
                                           page.of)
                                       : 3) <
                                     item &&
