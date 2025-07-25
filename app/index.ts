@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 // import { expandRouter } from "./helper";
 import dotenv from "dotenv";
 // import fs from 'fs';
-import https from 'https';
+import http from 'http';
 
 dotenv.config();
 
@@ -82,7 +82,7 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 // }
 // else{
   
-https.createServer(app).listen(process.env.PORT, () => {
+http.createServer(app).listen(process.env.PORT, () => {
   console.log(`server running on port ${process.env.PORT}`);
 });
 // }
