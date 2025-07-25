@@ -10,18 +10,18 @@ import {
 import {
   fetchBlogTag,
 } from "@src/_states/reducers/blogTag/blogTag.thunk";
-import { navigate } from "@src/helper/helper";
 import { api } from "../../../../../../../_config/config";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@src/_states/store";
 import { RootState } from "@src/_states/types";
-import { useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 
 const TagCreateEdit: React.FC<ITagCreateEdit> = ({ isEdit }) => {
   const [oneTime, setOneTime] = useState(isEdit);
   const blogTag = useSelector((state:RootState)=>(state.blogTag));
   const {uid} = useParams<{uid:string}>()
   const dispatch = useDispatch<AppDispatch>();
+  const history = useHistory();
 
   const validation = () => {
     return yup.object().shape({
@@ -109,7 +109,7 @@ const TagCreateEdit: React.FC<ITagCreateEdit> = ({ isEdit }) => {
               show:["uid", "name", "created_at", "updated_at"]
             })
           );
-          navigate("/dashboard/blog/tag");
+          history.push("/dashboard/blog/tag");
         }
       })
       .catch(() => {

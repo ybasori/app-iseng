@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { navigate } from "@src/helper/helper";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@src/_states/store";
 import { RootState } from "@src/_states/types";
 import { logout } from "@src/_states/reducers/auth/auth.slice";
-import { NavLink } from "react-router-dom";
+import { NavLink, useHistory } from "react-router-dom";
 
 const Navbar = () => {
     const auth = useSelector((state:RootState)=>state.auth);
     const dispatch = useDispatch<AppDispatch>();
+    const history = useHistory();
 
     const [isLogoutLoading, setIsLogoutLoading] = useState(false);
     const [openMenu, setOpenMenu] = useState(false);
@@ -27,7 +27,7 @@ const Navbar = () => {
                 console.log('Response:', data);
                 setIsLogoutLoading(false);
                 dispatch(logout());
-                navigate("/");
+                history.push("/");
             })
             .catch(error => {
                 setIsLogoutLoading(false);

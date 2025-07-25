@@ -10,12 +10,11 @@ import useForm, { ICallbackSubmit } from "@src/hooks/useForm";
 import * as yup from "yup";
 import { ICreateEdit } from "./CreateEdit.type";
 import { useCallback, useEffect, useState } from "react";
-import { navigate } from "@src/helper/helper";
 import { api } from "../../../../../../../../_config/config";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@src/_states/store";
 import { RootState } from "@src/_states/types";
-import { useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 
 const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
   const [oneTime, setOneTime] = useState(true);
@@ -24,6 +23,7 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
   const blogContent = useSelector((state:RootState)=>(state.blogContent));
   const {uid} = useParams<{uid: string}>();
   const dispatch = useDispatch<AppDispatch>();
+  const history = useHistory();
 
   const validation = () => {
     return yup.object().shape({
@@ -165,7 +165,7 @@ const CreateEdit: React.FC<ICreateEdit> = ({ isEdit }) => {
               ]}
             )
           );
-          navigate("/dashboard/blog/content");
+          history.push("/dashboard/blog/content");
         }
       })
       .catch(() => {

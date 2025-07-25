@@ -8,18 +8,18 @@ import {
   setSort,
 } from "@src/_states/reducers/blogCategory/blogCategory.slice";
 import { fetchBlogCategory } from "@src/_states/reducers/blogCategory/blogCategory.thunk";
-import { navigate } from "@src/helper/helper";
 import { api } from "../../../../../../../_config/config";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@src/_states/store";
 import { RootState } from "@src/_states/types";
-import { useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 
 const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
   const {uid} = useParams<{uid:string}>()
   const [oneTime, setOneTime] = useState(isEdit);
   const blogCategory = useSelector((state:RootState)=>(state.blogCategory));
   const dispatch = useDispatch<AppDispatch>();
+  const history = useHistory();
 
   const validation = () => {
     return yup.object().shape({
@@ -113,7 +113,7 @@ const CategoryCreateEdit: React.FC<ICategoryCreateEdit> = ({ isEdit }) => {
               show:["uid", "name", "created_at", "updated_at"]
             })
           );
-          navigate("/dashboard/blog/category");
+          history.push("/dashboard/blog/category");
         }
       })
       .catch(() => {

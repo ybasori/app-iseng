@@ -76,7 +76,16 @@ const PublicBlogMain = () => {
   return (
     <>
       {publicBlogContent.loading ? (
-        <i className="fa-solid fa-circle-notch fa-spin"></i>
+        <>
+          <div className="skeleton-block"></div>
+          <div className="skeleton-lines">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+        </>
       ) : (
         <>
           {(!!publicBlogContent.response
