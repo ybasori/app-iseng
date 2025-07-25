@@ -155,16 +155,16 @@ const routes: IRoute[] = [
       },
     ],
   },
-//   {
-//     path: "/",
-//     method: "get",
-//     controller: homeController.any,
-//   },
   {
-    path: "/{*any}",
+    path: "/",
     method: "get",
     controller: homeController.any,
   },
+  // {
+  //   path: "/{*any}",
+  //   method: "get",
+  //   controller: homeController.any,
+  // },
 ];
 
 export default routes;
