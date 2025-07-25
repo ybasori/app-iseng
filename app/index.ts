@@ -49,6 +49,7 @@ expandRouter(routes).forEach((item) =>
     : null
 );
 
+if(process.env.NODE_ENV !== "production"){
 
 const key = fs.readFileSync('./ssl/key.pem');
 const cert = fs.readFileSync('./ssl/cert.pem');
@@ -56,3 +57,11 @@ const cert = fs.readFileSync('./ssl/cert.pem');
 https.createServer({ key, cert }, app).listen(process.env.PORT, () => {
   console.log(`server running on port ${process.env.PORT}`);
 });
+
+}
+else{
+  
+https.createServer(app).listen(process.env.PORT, () => {
+  console.log(`server running on port ${process.env.PORT}`);
+});
+}
